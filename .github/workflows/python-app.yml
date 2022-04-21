@@ -26,7 +26,7 @@ jobs:
       run: pip install poetry
 
     - name: Install requirements
-      run: poetry update
+      run: poetry install
 
     - name: Check formatting
       run: poetry run black --check .
