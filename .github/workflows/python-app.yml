@@ -22,17 +22,20 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install dev requirements
-      run: pip install -r dev-requirements
+    - name: Install Poetry
+      run: pip install poetry
+
+    - name: Install requirements
+      run: poetry update
 
     - name: Check formatting
-      run: python -m black --check .
+      run: poetry run black --check .
 
     - name: Check typing
-      run: python -m mypy --config-file pyproject.toml .
+      run: poetry run mypy --config-file pyproject.toml .
 
     - name: Check pylint
-      run: python -m pylint --rcfile pyproject.toml *.py vem
+      run: poetry run pylint --rcfile pyproject.toml *.py vem
 
     - name: Execute tests
-      run: python -m pytest --cov=vem --cov-fail-under $REQUIRED_COVERAGE
+      run: poetry run pytest --cov=vem --cov-fail-under $REQUIRED_COVERAGE
