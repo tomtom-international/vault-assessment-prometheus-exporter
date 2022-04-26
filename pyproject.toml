@@ -5,12 +5,15 @@ description = "Prometheus exporter to monitor custom metadata for KV2 secrets fo
 authors = ["Eugene Davis <eugene.davis@tomtom.com>"]
 
 packages = [
-    { include = "vem" },
-    { include = "*.py" },
+    { include = "expiration_monitor" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+hvac = "0.11.2"
+prometheus-client = "0.14.1"
+requests = "2.27.1"
+PyYAML = "6.0"
 
 [tool.poetry.dev-dependencies]
 black = "22.3.0"
