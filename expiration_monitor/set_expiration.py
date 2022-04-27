@@ -4,6 +4,7 @@ Updates the last-updated and expiration date-time fields for a given secret
 
 import logging
 import argparse
+import warnings
 
 import requests
 
@@ -39,6 +40,12 @@ def handle_args():
     expiration_group.add_argument("--minutes", default=0, type=int, help="Set the number of minutes before expiration.")
     expiration_group.add_argument("--seconds", default=0, type=int, help="Set the number of minutes before expiration.")
 
+    fieldnames_group = parser.add_argument_group(
+        title="Fieldnames", description="Configure the fieldnames to use (optional).\nThese must be matched by the exporter configuration for expiration monitoring."
+    )
+    fieldnames_group.add_argument("--last_renewed_timestamp_fieldname", default="last_renewal_timestamp", type=str, help="Set the fieldname to use for the last renewed timestamp.")
+    fieldnames_group.add_argument("--expiration_timestamp_fieldname", default="expiration_timestamp", type=str, help="Set the fieldname to use for the expiration timestamp.")
+
     return parser.parse_args()
 
 
@@ -48,18 +55,42 @@ def main():
     # Get the hvac client, we will have to use requests some with the token it manages
     vault_client = get_vault_client_for_user(url=args.address, namespace=args.namespace)
 
-    expiration_info = expirationMetadata.fromDuration(args.weeks, args.days, args.hours, args.minutes, args.seconds)
+    expiration_info = expirationMetadata.fromDuration(args.weeks, args.days, args.hours, args.minutes, args.seconds, args.last_renewed_timestamp_fieldname, args.expiration_timestamp_fieldname)
 
     logging.basicConfig(level=args.logging)
 
     LOGGER.info("Updating expiration data for secret.")
 
     # Custom metadata isn't fully supported by hvac at the moment, use requests
-    response = requests.put(
+    response = requests.patch(
         f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
-        headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token},
+        headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
         json={"custom_metadata": expiration_info.get_serialized_expiration_metadata()},
     )
+
+    if response.status_code == 405:
+        warnings.warn("Received 405 error when attempting to PATCH metadata, GET/PUT metadata update. This indicates an older version of Vault is in us (<10), support will eventually be dropped from this tool.", DeprecationWarning)
+        response = requests.get(
+            f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
+            headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
+        )
+        response.raise_for_status()
+
+        # Take the existing metadata, clean up what we don't control, update it and then push it
+        metadata = response.json()
+        metadata["data"]["custom_metadata"].update(expiration_info.get_serialized_expiration_metadata())
+        metadata = metadata["data"]
+        del metadata["created_time"]
+        del metadata["current_version"]
+        del metadata["oldest_version"]
+        del metadata["updated_time"]
+        del metadata["versions"]
+
+        response = requests.put(
+            f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
+            headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token},
+            json=metadata,
+        )
 
     response.raise_for_status()
 

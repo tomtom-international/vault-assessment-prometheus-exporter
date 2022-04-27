@@ -29,9 +29,6 @@ def main():
         for service, service_config in secret_config.items():
             # Should instantiate a class with each config
             logging.info("Configuring monitoring for service %s", service)
-            print(service)
-            print(service_config.get("prometheus_labels", expiration_default_prometheus_labels))
-            print(service_config.get("metadata_fieldnames", expiration_default_metadata_filenames))
             for secret in service_config.get("secrets"):
                 logging.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
                 monitor = expirationMonitor(
@@ -44,13 +41,13 @@ def main():
                 )
                 monitors.append(monitor)
 
-    start_http_server(8000)
+    start_http_server(config.get("port", 8546))
 
     while True:
         for monitor in monitors:
             monitor.update_metrics()
 
-        sleep(config.get("refresh_interval", config.get("port", 8546)))
+        sleep(config.get("refresh_interval", 30))
 
 
 if __name__ == "__main__":

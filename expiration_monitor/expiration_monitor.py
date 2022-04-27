@@ -13,19 +13,21 @@ class expirationMonitor:
         self.service = service
         self.prometheus_labels = prometheus_labels
 
-        self.secret_last_renewal_timestamp = Gauge(f"secret_{self.__get_metric_base_name()}_last_renewal_timestamp", "Timestamp for when the secret was last updated.")
-        self.secret_expiration_timestamp = Gauge(f"secret_{self.__get_metric_base_name()}_expiration_timestamp", "Timestamp for when the secret should expire.")
+        self.secret_last_renewal_timestamp_gauge = Gauge(f"secret_{self.__get_metric_base_name()}_last_renewal_timestamp", "Timestamp for when the secret was last updated.", prometheus_labels.keys())
+        self.secret_expiration_timestamp_gauge = Gauge(f"secret_{self.__get_metric_base_name()}_expiration_timestamp", "Timestamp for when the secret should expire.", prometheus_labels.keys())
+
+        self.last_renewed_timestamp_fieldname = metadata_fieldnames.get("last_renewal_timestamp", "last_renewal_timestamp")
+        self.expiration_timestamp_fieldname = metadata_fieldnames.get("expiration_timestamp", "expiration_timestamp")
 
     def update_metrics(self) -> None:
         response = requests.get(
             f"{self.vault_client.url}/v1/{self.mount_point}/metadata/{self.secret_path}", headers={"X-Vault-Namespace": self.vault_client.adapter.namespace, "X-Vault-Token": self.vault_client.token}
         )
 
-        expiration_info = expirationMetadata.fromMetadata(response.json()["data"]["custom_metadata"])
+        expiration_info = expirationMetadata.fromMetadata(response.json()["data"]["custom_metadata"], self.last_renewed_timestamp_fieldname, self.expiration_timestamp_fieldname)
 
-        # TODO: Set labels
-        self.secret_last_renewal_timestamp.set(expiration_info.get_last_renewal_timestamp())
-        self.secret_expiration_timestamp.set(expiration_info.get_expiration_timestamp())
+        self.secret_last_renewal_timestamp_gauge.labels(**self.prometheus_labels).set(expiration_info.get_last_renewal_timestamp())
+        self.secret_expiration_timestamp_gauge.labels(**self.prometheus_labels).set(expiration_info.get_expiration_timestamp())
 
     def __get_metric_base_name(self) -> str:
         return self.mount_point.replace("/", "_") + "_" + self.secret_path.replace("/", "_")
