@@ -3,6 +3,7 @@ from prometheus_client import Gauge
 
 from expiration_monitor.vault_time import expirationMetadata
 
+
 class expirationMonitor:
     def __init__(self, mount_point: str, secret_path: str, vault_client, service: str, prometheus_labels: dict, metadata_fieldnames: dict) -> None:
         self.mount_point = mount_point
@@ -28,4 +29,6 @@ class expirationMonitor:
         self.secret_expiration_timestamp_gauge.labels(**self.prometheus_labels).set(expiration_info.get_expiration_timestamp())
 
     def __get_metric_base_name(self) -> str:
-        return self.service + "_" + self.mount_point.replace("/", "_") + "_" + self.secret_path.replace("/", "_")
+        mount_point_cleaned = self.mount_point.replace("/", "_").replace("-", "_")
+        secret_path_cleaned = self.secret_path.replace("/", "_").replace("-", "_")
+        return self.service + "_" + mount_point_cleaned + "_" + secret_path_cleaned

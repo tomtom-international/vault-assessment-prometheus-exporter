@@ -69,7 +69,10 @@ def main():
     )
 
     if response.status_code == 405:
-        warnings.warn("Received 405 error when attempting to PATCH metadata, GET/PUT metadata update. This indicates an older version of Vault is in us (<10), support will eventually be dropped from this tool.", DeprecationWarning)
+        warnings.warn(
+            "Received 405 error when attempting to PATCH metadata, GET/PUT metadata update. This indicates an older version of Vault is in us (<10), support will eventually be dropped from this tool.",
+            DeprecationWarning,
+        )
         response = requests.get(
             f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
             headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
@@ -78,6 +81,11 @@ def main():
 
         # Take the existing metadata, clean up what we don't control, update it and then push it
         metadata = response.json()
+
+        # When no custom_metadata is set, Vault will return None, so we have to set up an empty dictionary
+        if not metadata["data"]["custom_metadata"]:
+            metadata["data"]["custom_metadata"] = {}
+
         metadata["data"]["custom_metadata"].update(expiration_info.get_serialized_expiration_metadata())
         metadata = metadata["data"]
         del metadata["created_time"]
