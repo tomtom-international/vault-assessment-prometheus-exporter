@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from typing import List, Dict
 
 from expiration_monitor.expiration_monitor import expirationMonitor
@@ -6,12 +7,18 @@ from expiration_monitor.expiration_monitor import expirationMonitor
 
 def create_monitors(config: Dict, vault_client) -> List[expirationMonitor]:
     default_prometheus_labels = config.get("prometheus_labels", {})
+    prometheus_label_keys = list(default_prometheus_labels.keys())
     default_metadata_filenames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
 
     secret_monitors = []
     for secret_config in config.get("services", {}):
         for service, service_config in secret_config.items():
             logging.info("Configuring monitoring for service %s", service)
+            # Use deepcopy since dicts are handled by ref and tend to get overwritten otherwise
+            service_prometheus_labels = deepcopy(default_prometheus_labels)
+            service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
+            check_prometheus_labels(service, prometheus_label_keys, service_prometheus_labels)
+
             for secret in service_config.get("secrets"):
                 if not secret.get("recursive", False):
                     logging.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
@@ -20,7 +27,8 @@ def create_monitors(config: Dict, vault_client) -> List[expirationMonitor]:
                         secret.get("secret_path"),
                         vault_client,
                         service,
-                        service_config.get("prometheus_labels", default_prometheus_labels),
+                        service_prometheus_labels,
+                        prometheus_label_keys,
                         service_config.get("metadata_fieldnames", default_metadata_filenames),
                     )
                     secret_monitors.append(monitor)
@@ -32,7 +40,8 @@ def create_monitors(config: Dict, vault_client) -> List[expirationMonitor]:
                             sub_secret,
                             vault_client,
                             service,
-                            service_config.get("prometheus_labels", default_prometheus_labels),
+                            service_prometheus_labels,
+                            prometheus_label_keys,
                             service_config.get("metadata_fieldnames", default_metadata_filenames),
                         )
                         secret_monitors.append(monitor)
@@ -53,3 +62,9 @@ def recurse_secrets(mount_point: str, secret_path: str, vault_client) -> List[st
             secrets.append(f"{secret_path}/{key}")
 
     return secrets
+
+
+def check_prometheus_labels(service, configured_label_keys, proposed_labels):
+    for key in proposed_labels.keys():
+        if key not in configured_label_keys:
+            raise RuntimeError(f"expiration_monitoring {service} configures prometheus_labels with key {key} which is not in the globally configured prometheus labels!")
