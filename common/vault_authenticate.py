@@ -3,6 +3,9 @@ Functions for getting Hashicorp Vault client
 """
 import os
 import logging
+import warnings
+
+from typing import Dict
 
 import hvac
 
@@ -13,10 +16,8 @@ def get_vault_client_for_user(url: str = None, namespace: str = None, vault_toke
     """
     Gets a HVAC Vault client instance configured against Vault, targeted towards end-user systems (checks for environmental variables and existing token in .vault-token)
     """
-    if not url:
-        url = os.getenv("VAULT_ADDR")
-    if not namespace:
-        namespace = os.getenv("VAULT_NAMESPACE")
+    url = get_address(url)
+    namespace = get_namespace(namespace)
     if not vault_token:
         LOGGER.debug("Attempting to read Vault token from file.")
         with open(os.path.expanduser("~/.vault-token"), "r", encoding="utf8") as token_file:
@@ -31,3 +32,91 @@ def get_vault_client_for_user(url: str = None, namespace: str = None, vault_toke
         raise RuntimeError("Unable to get Vault token.\nPlease execute `vault login`, provide it as an argument or set the VAULT_ADDR environmental variable.")
 
     return hvac.Client(url=url, token=vault_token, namespace=namespace)
+
+
+def get_authenticated_client(auth_config: Dict[str, Dict[str, str]], address: str, namespace: str) -> hvac.Client:
+    namespace = get_namespace(namespace)
+    address = get_address(address)
+
+    if len(auth_config) > 1:
+        warnings.warn("Multiple authentication methods are selected. Only the highest priority one will be used, please review your configuration!")
+
+    vault_token = None
+    approle_auth_config = auth_config.get("approle", None)
+    kubernetes_auth_config = auth_config.get("kubernetes", None)
+    token_auth_config = auth_config.get("token", {})
+
+    if approle_auth_config:
+        return get_client_with_approle_auth(approle_auth_config, address, namespace)
+
+    elif kubernetes_auth_config:
+        return get_client_with_kubernetes_auth(kubernetes_auth_config, address, namespace)
+
+    # As a last ditch effort check for tokens, this includes checking for sensible defaults in case of limited configuration
+    return get_client_with_token_auth(token_auth_config, address, namespace)
+
+
+def get_namespace(namespace: str) -> str:
+    """
+    In the event that namespace is None, return the value for VAULT_NAMESPACE if that is set
+    """
+    # Checks explicitly for None, an empty string is a valid option
+    if namespace is None:
+        namespace = os.getenv("VAULT_NAMESPACE", "")
+    return namespace
+
+
+def get_address(address: str) -> str:
+    if not address:
+        address = os.getenv("VAULT_ADDR", None)
+    return address
+
+
+def get_client_with_approle_auth(config: Dict[str, str], address: str, namespace: str) -> hvac.Client:
+    role_id = config.get("role_id", None)
+    if not role_id:
+        role_id_variable = config.get("role_id_variable", None)
+        if role_id_variable:
+            role_id = os.getenv(role_id_variable)
+        else:
+            role_id_filename = config.get("role_id_file", None)
+            if role_id_filename:
+                with open(role_id_filename, "r") as role_id_file:
+                    role_id = role_id_file.read()
+
+    secret_id = config.get("secret_id", None)
+    if not secret_id:
+        secret_id_variable = config.get("secret_id_variable", None)
+        if secret_id_variable:
+            secret_id = os.getenv(secret_id_variable)
+        else:
+            secret_id_filename = config.get("secret_id_file", None)
+            if secret_id_filename:
+                with open(secret_id_filename, "r") as secret_id_file:
+                    secret_id = secret_id_file.read()
+
+    client = hvac.Client(url=address, namespace=namespace)
+    return client.auth.approle.login(role_id=role_id, secret_id=secret_id)
+
+
+def get_client_with_kubernetes_auth(config: Dict[str, str], address: str, namespace: str) -> hvac.Client:
+    mount_point = config.get("mount_point", "kubernetes")
+    jwt_file_path = config.get("token_file", "/var/run/secrets/kubernetes.io/serviceaccount/token")
+    with open(jwt_file_path, "r") as jwt_file:
+        jwt = jwt_file.read()
+    client = hvac.Client(url=address, namespace=namespace)
+    return client.auth_kubernetes(mount_point, jwt)
+
+
+def get_client_with_token_auth(config: Dict[str, str], address: str, namespace: str) -> hvac.Client:
+    token_var_name = config.get("token_var_name", None)
+    token_file = config.get("token_file", None)
+    vault_token = None
+    if token_var_name:
+        vault_token = os.getenv(token_var_name, None)
+    elif token_file:
+        with open(os.path.expanduser(token_file), "r", encoding="utf8") as token_file:
+            vault_token = token_file.read()
+
+    # If vault_token is none, the hvac client will check for sensible defaults during init (VAULT_TOKEN and ~/.vault-token)
+    return hvac.Client(url=address, token=vault_token, namespace=namespace)

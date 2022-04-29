@@ -4,7 +4,7 @@ import yaml
 import logging
 from prometheus_client import start_http_server
 
-from common.vault_authenticate import get_vault_client_for_user
+from common.vault_authenticate import get_authenticated_client
 import expiration_monitor.create_monitors as expiration
 
 
@@ -15,7 +15,7 @@ def main():
     # Get the hvac client, we will have to use requests some with the token it manages
     vault_config = config.get("vault", {})
     # TODO: Accept K8S and AppRole as well as built-in token
-    vault_client = get_vault_client_for_user(url=vault_config.get("address", None), namespace=vault_config.get("namespace", None))
+    vault_client = get_authenticated_client(auth_config=vault_config.get("authentication"), address=vault_config.get("address", None), namespace=vault_config.get("namespace", None))
 
     monitors = []
 
