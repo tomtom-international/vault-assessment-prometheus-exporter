@@ -22,7 +22,7 @@ def main():
     expiration_monitoring_config = config.get("expiration_monitoring", {})
     monitors += expiration.create_monitors(expiration_monitoring_config, vault_client)
 
-    start_http_server(config.get("port", 8546))
+    start_http_server(config.get("port", 9935))
 
     while True:
         for monitor in monitors:
