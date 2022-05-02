@@ -17,7 +17,7 @@ import vault_monitor.expiration_monitor.create_monitors as expiration
 # pylint: disable=duplicate-code,too-many-arguments,too-many-locals
 
 
-def configure_and_launch(config_file: FileIO, log_level: str="INFO") -> None:
+def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
     """
     Read configuration file, load the specified monitors, configure exporter and enter main loop.
     """

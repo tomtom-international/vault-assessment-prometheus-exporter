@@ -2,10 +2,10 @@
 Wraps time handling calls to ensure consistent formatting
 """
 
-from typing import Dict,TypeVar, Type
+from typing import Dict, TypeVar, Type
 from datetime import datetime, timedelta
 
-ExpirationMetadataType = TypeVar('ExpirationMetadataType', bound="ExpirationMetadata") # pylint: disable=invalid-name
+ExpirationMetadataType = TypeVar("ExpirationMetadataType", bound="ExpirationMetadata")  # pylint: disable=invalid-name
 
 
 class ExpirationMetadata:
@@ -21,7 +21,16 @@ class ExpirationMetadata:
         self.expiration_timestamp_fieldname = expiration_timestamp_fieldname
 
     @classmethod
-    def from_duration(cls: Type[ExpirationMetadataType], expiration_weeks: int, expiration_days: int, expiration_hours: int, expiration_minutes: int, expiration_seconds: int, last_renewed_timestamp_fieldname: str, expiration_timestamp_fieldname: str) -> ExpirationMetadataType:
+    def from_duration(
+        cls: Type[ExpirationMetadataType],
+        expiration_weeks: int,
+        expiration_days: int,
+        expiration_hours: int,
+        expiration_minutes: int,
+        expiration_seconds: int,
+        last_renewed_timestamp_fieldname: str,
+        expiration_timestamp_fieldname: str,
+    ) -> ExpirationMetadataType:
         """
         Creates an instance of ExpirationMetadata from the current time for last_renewed_time and gets the expiration from duration input
         """

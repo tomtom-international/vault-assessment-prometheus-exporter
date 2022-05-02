@@ -9,12 +9,14 @@ from prometheus_client import Gauge
 
 from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
-ExpirationMonitorType = TypeVar('ExpirationMonitorType', bound="ExpirationMonitor") # pylint: disable=invalid-name
+ExpirationMonitorType = TypeVar("ExpirationMonitorType", bound="ExpirationMonitor")  # pylint: disable=invalid-name
+
 
 class ExpirationMonitor:
     """
     Monitors and updates a secret in HashiCorp Vault for expiration based on custom metadat.
     """
+
     secret_last_renewal_timestamp_gauge: Gauge
     secret_expiration_timestamp_gauge: Gauge
 
