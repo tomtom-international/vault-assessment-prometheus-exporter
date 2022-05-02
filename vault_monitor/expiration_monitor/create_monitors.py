@@ -2,7 +2,7 @@ import logging
 from copy import deepcopy
 from typing import List, Dict
 
-from expiration_monitor.expiration_monitor import expirationMonitor
+from vault_monitor.expiration_monitor.expiration_monitor import expirationMonitor
 
 
 def create_monitors(config: Dict, vault_client) -> List[expirationMonitor]:

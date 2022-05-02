@@ -2,7 +2,7 @@ import requests
 from typing import Dict, List
 from prometheus_client import Gauge
 
-from expiration_monitor.vault_time import expirationMetadata
+from vault_monitor.expiration_monitor.vault_time import expirationMetadata
 
 
 class expirationMonitor:

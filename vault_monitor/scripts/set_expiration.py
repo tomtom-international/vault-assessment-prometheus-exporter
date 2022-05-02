@@ -8,13 +8,16 @@ import warnings
 
 import requests
 
-from common.vault_authenticate import get_vault_client_for_user
-from vault_time import expirationMetadata
+from vault_monitor.common.vault_authenticate import get_vault_client_for_user
+from vault_monitor.expiration_monitor.vault_time import expirationMetadata
 
 LOGGER = logging.getLogger("set_expiration")
 
 
 def handle_args():
+    """
+    Handles arg parser, returning the values it sets.
+    """
     parser = argparse.ArgumentParser(description="Update a kv2 secret with expiration metadata.")
 
     parser.add_argument("mount_point", type=str, help="Mount point of kv2 engine, e.g. secret")
@@ -49,32 +52,46 @@ def handle_args():
     return parser.parse_args()
 
 
-def main():
-    args = handle_args()
-
+def set_expiration(
+    address: str,
+    namespace: str,
+    mount_point: str,
+    secret_path: str,
+    weeks: int,
+    days: int,
+    hours: int,
+    minutes: int,
+    seconds: int,
+    last_renewed_timestamp_fieldname: str = "last_renewal_timestamp",
+    expiration_timestamp_fieldname: str = "expiration_timestamp",
+    log_level: str = "INFO",
+) -> None: # pylint disable=too-many-arguments
+    """
+    Sets expiration metadadate for specified secret.
+    """
     # Get the hvac client, we will have to use requests some with the token it manages
-    vault_client = get_vault_client_for_user(url=args.address, namespace=args.namespace)
+    vault_client = get_vault_client_for_user(url=address, namespace=namespace)
 
-    expiration_info = expirationMetadata.fromDuration(args.weeks, args.days, args.hours, args.minutes, args.seconds, args.last_renewed_timestamp_fieldname, args.expiration_timestamp_fieldname)
+    expiration_info = expirationMetadata.fromDuration(weeks, days, hours, minutes, seconds, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
 
-    logging.basicConfig(level=args.logging)
+    logging.basicConfig(level=log_level)
 
     LOGGER.info("Updating expiration data for secret.")
 
     # Custom metadata isn't fully supported by hvac at the moment, use requests
     response = requests.patch(
-        f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
+        f"{vault_client.url}/v1/{mount_point}/metadata/{secret_path}",
         headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
         json={"custom_metadata": expiration_info.get_serialized_expiration_metadata()},
     )
 
     if response.status_code == 405:
         warnings.warn(
-            "Received 405 error when attempting to PATCH metadata, GET/PUT metadata update. This indicates an older version of Vault is in us (<10), support will eventually be dropped from this tool.",
+            "Received 405 error when attempting to PATCH metadata, using GET+PUT instead. This indicates an older version of Vault is in us (<10), support will eventually be dropped from this tool.",
             DeprecationWarning,
         )
         response = requests.get(
-            f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
+            f"{vault_client.url}/v1/{mount_point}/metadata/{secret_path}",
             headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
         )
         response.raise_for_status()
@@ -95,13 +112,32 @@ def main():
         del metadata["versions"]
 
         response = requests.put(
-            f"{vault_client.url}/v1/{args.mount_point}/metadata/{args.secret_path}",
+            f"{vault_client.url}/v1/{mount_point}/metadata/{secret_path}",
             headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token},
             json=metadata,
         )
 
     response.raise_for_status()
 
+def main():
+    """
+    Gets the arguments and passes them to set_expiration function.
+    """
+    args = handle_args()
+    set_expiration(
+        args.address,
+        args.namespace,
+        args.mount_point,
+        args.secret_path,
+        args.weeks,
+        args.days,
+        args.hours,
+        args.minutes,
+        args.seconds,
+        args.last_renewed_timestamp_fieldname,
+        args.expiration_timestamp_fieldname,
+        args.logging,
+    )
 
 if __name__ == "__main__":
     main()
