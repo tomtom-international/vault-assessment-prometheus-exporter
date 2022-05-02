@@ -9,9 +9,12 @@ import warnings
 import requests
 
 from vault_monitor.common.vault_authenticate import get_vault_client_for_user
-from vault_monitor.expiration_monitor.vault_time import expirationMetadata
+from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
 LOGGER = logging.getLogger("set_expiration")
+
+# Disable certain things for scripts only, as over-doing the DRY-ness of them can cause them to be less useful as samples
+# pylint: disable=duplicate-code,too-many-arguments,too-many-locals
 
 
 def handle_args():
@@ -52,7 +55,7 @@ def handle_args():
     return parser.parse_args()
 
 
-def set_expiration( # pylint: disable=too-many-arguments,too-many-locals
+def set_expiration(
     address: str,
     namespace: str,
     mount_point: str,
@@ -65,14 +68,14 @@ def set_expiration( # pylint: disable=too-many-arguments,too-many-locals
     last_renewed_timestamp_fieldname: str = "last_renewal_timestamp",
     expiration_timestamp_fieldname: str = "expiration_timestamp",
     log_level: str = "INFO",
-) -> None: # pylint disable=too-many-arguments
+) -> None:
     """
     Sets expiration metadadate for specified secret.
     """
     # Get the hvac client, we will have to use requests some with the token it manages
     vault_client = get_vault_client_for_user(url=address, namespace=namespace)
 
-    expiration_info = expirationMetadata.fromDuration(weeks, days, hours, minutes, seconds, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
+    expiration_info = ExpirationMetadata.from_duration(weeks, days, hours, minutes, seconds, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
 
     logging.basicConfig(level=log_level)
 
@@ -119,6 +122,7 @@ def set_expiration( # pylint: disable=too-many-arguments,too-many-locals
 
     response.raise_for_status()
 
+
 def main():
     """
     Gets the arguments and passes them to set_expiration function.
@@ -138,6 +142,7 @@ def main():
         args.expiration_timestamp_fieldname,
         args.logging,
     )
+
 
 if __name__ == "__main__":
     main()

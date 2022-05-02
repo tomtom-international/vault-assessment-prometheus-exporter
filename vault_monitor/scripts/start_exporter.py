@@ -12,6 +12,9 @@ from vault_monitor.common.vault_authenticate import get_authenticated_client
 
 import vault_monitor.expiration_monitor.create_monitors as expiration
 
+# Disable certain things for scripts only, as over-doing the DRY-ness of them can cause them to be less useful as samples
+# pylint: disable=duplicate-code,too-many-arguments,too-many-locals
+
 
 def configure_and_launch(config_file, log_level="INFO"):
     """
@@ -38,12 +41,14 @@ def configure_and_launch(config_file, log_level="INFO"):
         # Default to 30 seconds, configurable
         sleep(config.get("refresh_interval", 30))
 
+
 def main():
     """
     Get user arguments and launch the exporter
     """
     args = handle_args()
     configure_and_launch(args.config_file, args.logging)
+
 
 def handle_args():
     """
@@ -60,9 +65,10 @@ def handle_args():
         help="Set the log level.",
     )
 
-    parser.add_argument("--config_file", type=argparse.FileType('r', encoding='UTF-8'), default="config.yaml", help="Configuration file for the exporter.")
+    parser.add_argument("--config_file", type=argparse.FileType("r", encoding="UTF-8"), default="config.yaml", help="Configuration file for the exporter.")
 
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     main()

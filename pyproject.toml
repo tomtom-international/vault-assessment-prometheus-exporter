@@ -137,9 +137,11 @@ max-nested-blocks = 5
 [tool.pylint.FORMAT]
 max-line-length = 200
 max-module-lines = 1000
+max-args = 10
 
 [tools.pylint.SIMILARITIES]
 min-similarity-lines = 4
+ignore-imports = "yes"
 
 [tool.pytest.ini_options]
 minversion = "6.2.5"
