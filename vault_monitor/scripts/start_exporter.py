@@ -1,15 +1,24 @@
+"""
+Launches the vault monitoring exporter
+"""
+import logging
+import argparse
 from time import sleep
 
 import yaml
 from prometheus_client import start_http_server
 
 from vault_monitor.common.vault_authenticate import get_authenticated_client
+
 import vault_monitor.expiration_monitor.create_monitors as expiration
 
 
-def main():
-    with open("config.yaml", "r") as config_file:
-        config = yaml.safe_load(config_file)
+def configure_and_launch(config_file, log_level="INFO"):
+    """
+    Read configuration file, load the specified monitors, configure exporter and enter main loop.
+    """
+    config = yaml.safe_load(config_file)
+    logging.basicConfig(level=log_level)
 
     # Get the hvac client, we will have to use requests some with the token it manages
     vault_config = config.get("vault", {})
@@ -26,8 +35,34 @@ def main():
         for monitor in monitors:
             monitor.update_metrics()
 
+        # Default to 30 seconds, configurable
         sleep(config.get("refresh_interval", 30))
 
+def main():
+    """
+    Get user arguments and launch the exporter
+    """
+    args = handle_args()
+    configure_and_launch(args.config_file, args.logging)
+
+def handle_args():
+    """
+    Handles arg parser, returning the args object it provides.
+    """
+    parser = argparse.ArgumentParser(description="Update a kv2 secret with expiration metadata.")
+
+    parser.add_argument(
+        "-l",
+        "--logging",
+        type=str,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Set the log level.",
+    )
+
+    parser.add_argument("--config_file", type=argparse.FileType('r', encoding='UTF-8'), default="config.yaml", help="Configuration file for the exporter.")
+
+    return parser.parse_args()
 
 if __name__ == "__main__":
     main()

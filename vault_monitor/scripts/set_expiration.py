@@ -52,7 +52,7 @@ def handle_args():
     return parser.parse_args()
 
 
-def set_expiration(
+def set_expiration( # pylint: disable=too-many-arguments,too-many-locals
     address: str,
     namespace: str,
     mount_point: str,
