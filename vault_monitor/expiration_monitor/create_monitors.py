@@ -5,12 +5,14 @@ import logging
 from copy import deepcopy
 from typing import List, Dict
 
+from hvac import Client as hvac_client
+
 from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
 
 LOGGER = logging.getLogger("secret-monitor")
 
 
-def create_monitors(config: Dict, vault_client) -> List[ExpirationMonitor]:
+def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationMonitor]:
     """
     Returns a list of secret monitors based on provided configuration.
     """
@@ -51,7 +53,7 @@ def create_monitors(config: Dict, vault_client) -> List[ExpirationMonitor]:
     return secret_monitors
 
 
-def recurse_secrets(mount_point: str, secret_path: str, vault_client) -> List[str]:
+def recurse_secrets(mount_point: str, secret_path: str, vault_client: hvac_client) -> List[str]:
     """
     Recursively return a list of secret paths to monitor
     """

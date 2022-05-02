@@ -25,6 +25,8 @@ mypy = "0.942"
 pylint = "2.13.7"
 pytest = "7.1.1"
 pytest-cov = "3.0.0"
+types-requests = "2.27.25"
+types-PyYAML = "6.0.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -36,8 +38,14 @@ line-length = 200
 
 
 [tool.mypy]
+disallow_untyped_defs = true
+explicit_package_bases = true
+namespace_packages = true
+exclude = 'tests'
 
-[[tool.mypy.overrides]]
+
+[[tool.mypy.overrides]] 
+module = 'hvac'
 ignore_missing_imports = true
 
 
@@ -141,7 +149,7 @@ max-args = 10
 
 [tools.pylint.SIMILARITIES]
 min-similarity-lines = 4
-ignore-imports = "yes"
+ignore-imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.2.5"

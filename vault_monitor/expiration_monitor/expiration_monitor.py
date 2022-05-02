@@ -1,21 +1,25 @@
 """
 Class for monitoring secrets in Hashicorp Vault.
 """
-from typing import Dict, List
+from typing import Dict, List, Type, TypeVar
 
 import requests
+import hvac
 from prometheus_client import Gauge
 
 from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
+ExpirationMonitorType = TypeVar('ExpirationMonitorType', bound="ExpirationMonitor") # pylint: disable=invalid-name
 
 class ExpirationMonitor:
     """
     Monitors and updates a secret in HashiCorp Vault for expiration based on custom metadat.
     """
+    secret_last_renewal_timestamp_gauge: Gauge
+    secret_expiration_timestamp_gauge: Gauge
 
     def __init__(
-        self, mount_point: str, secret_path: str, vault_client, service: str, prometheus_labels: Dict[str, str], prometheus_label_keys: List[str], metadata_fieldnames: Dict[str, str]
+        self, mount_point: str, secret_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str], prometheus_label_keys: List[str], metadata_fieldnames: Dict[str, str]
     ) -> None:
         """
         Creates an instance of the ExpirationMonitor class.
@@ -36,7 +40,7 @@ class ExpirationMonitor:
         self.create_metrics(prometheus_label_keys)
 
     @classmethod
-    def create_metrics(cls, prometheus_label_keys: Dict[str, str]) -> None:
+    def create_metrics(cls: Type[ExpirationMonitorType], prometheus_label_keys: List[str]) -> None:
         """
         Create the metrics, only happens once during the entire lifetime of the exporter (not with every object creation.)
         """

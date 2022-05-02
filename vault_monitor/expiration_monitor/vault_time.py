@@ -2,7 +2,10 @@
 Wraps time handling calls to ensure consistent formatting
 """
 
+from typing import Dict,TypeVar, Type
 from datetime import datetime, timedelta
+
+ExpirationMetadataType = TypeVar('ExpirationMetadataType', bound="ExpirationMetadata") # pylint: disable=invalid-name
 
 
 class ExpirationMetadata:
@@ -18,7 +21,7 @@ class ExpirationMetadata:
         self.expiration_timestamp_fieldname = expiration_timestamp_fieldname
 
     @classmethod
-    def from_duration(cls, expiration_weeks, expiration_days, expiration_hours, expiration_minutes, expiration_seconds, last_renewed_timestamp_fieldname: str, expiration_timestamp_fieldname: str):
+    def from_duration(cls: Type[ExpirationMetadataType], expiration_weeks: int, expiration_days: int, expiration_hours: int, expiration_minutes: int, expiration_seconds: int, last_renewed_timestamp_fieldname: str, expiration_timestamp_fieldname: str) -> ExpirationMetadataType:
         """
         Creates an instance of ExpirationMetadata from the current time for last_renewed_time and gets the expiration from duration input
         """
@@ -31,7 +34,7 @@ class ExpirationMetadata:
 
     # Used when reading from a secret
     @classmethod
-    def from_metadata(cls, metadata: dict, last_renewed_timestamp_fieldname: str, expiration_timestamp_fieldname: str):
+    def from_metadata(cls: Type[ExpirationMetadataType], metadata: dict, last_renewed_timestamp_fieldname: str, expiration_timestamp_fieldname: str) -> ExpirationMetadataType:
         """
         Creates an instance of ExpirationMetadata based on custom_metadata from the secret.
         """
@@ -52,17 +55,17 @@ class ExpirationMetadata:
         return cls(last_renewed_time, expiration_time, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
 
     @staticmethod
-    def __get_serialized_time_utc(time_object):
+    def __get_serialized_time_utc(time_object: datetime) -> str:
         """
         Returns iso formatted time with timezone included, assumes all times are in UTC.
         """
         return time_object.isoformat() + "Z"
 
     @staticmethod
-    def __get_time_from_iso_utc(timestamp):
+    def __get_time_from_iso_utc(timestamp: str) -> datetime:
         return datetime.fromisoformat(timestamp[:-1])
 
-    def get_serialized_expiration_metadata(self):
+    def get_serialized_expiration_metadata(self) -> Dict[str, str]:
         """
         Returns a dictionary with expiration metadata provided
         """
@@ -71,13 +74,13 @@ class ExpirationMetadata:
             self.expiration_timestamp_fieldname: self.__get_serialized_time_utc(self.expiration_time),
         }
 
-    def get_last_renewal_timestamp(self):
+    def get_last_renewal_timestamp(self) -> float:
         """
         Gets the timestamp for the last_renewed_timestamp field
         """
         return self.last_renewed_time.timestamp()
 
-    def get_expiration_timestamp(self):
+    def get_expiration_timestamp(self) -> float:
         """
         Gets the timestamp for the expiration timestamp field
         """

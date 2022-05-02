@@ -58,22 +58,22 @@ def get_authenticated_client(auth_config: Dict[str, Dict[str, str]], address: st
     return get_client_with_token_auth(token_auth_config, address, namespace)
 
 
-def get_namespace(namespace: str) -> str:
+def get_namespace(namespace: str = None) -> str:
     """
     In the event that namespace is None, return the value for VAULT_NAMESPACE if that is set
     """
     # Checks explicitly for None, an empty string is a valid option
     if namespace is None:
-        namespace = os.getenv("VAULT_NAMESPACE", "")
+        namespace = str(os.getenv("VAULT_NAMESPACE", ""))
     return namespace
 
 
-def get_address(address: str) -> str:
+def get_address(address: str = None) -> str:
     """
     If the Vault address isn't set, check the contents of the VAULT_ADDR environmental variable and return it.
     """
     if not address:
-        address = os.getenv("VAULT_ADDR", None)
+        address = str(os.getenv("VAULT_ADDR", ""))
     return address
 
 
@@ -124,12 +124,12 @@ def get_client_with_token_auth(config: Dict[str, str], address: str, namespace: 
     Returns an authenticated Vault client using token authentication.
     """
     token_var_name = config.get("token_var_name", None)
-    token_file = config.get("token_file", None)
+    token_filename = config.get("token_file", None)
     vault_token = None
     if token_var_name:
         vault_token = os.getenv(token_var_name, None)
-    elif token_file:
-        with open(os.path.expanduser(token_file), "r", encoding="utf8") as token_file:
+    elif token_filename:
+        with open(os.path.expanduser(token_filename), "r", encoding="utf8") as token_file:
             vault_token = token_file.read()
 
     # If vault_token is none, the hvac client will check for sensible defaults during init (VAULT_TOKEN and ~/.vault-token)

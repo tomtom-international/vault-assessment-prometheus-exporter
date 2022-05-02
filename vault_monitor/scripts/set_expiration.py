@@ -17,7 +17,7 @@ LOGGER = logging.getLogger("set_expiration")
 # pylint: disable=duplicate-code,too-many-arguments,too-many-locals
 
 
-def handle_args():
+def handle_args() -> argparse.Namespace:
     """
     Handles arg parser, returning the values it sets.
     """
@@ -123,7 +123,7 @@ def set_expiration(
     response.raise_for_status()
 
 
-def main():
+def main() -> None:
     """
     Gets the arguments and passes them to set_expiration function.
     """

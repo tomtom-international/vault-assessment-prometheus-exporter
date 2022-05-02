@@ -4,6 +4,7 @@ Launches the vault monitoring exporter
 import logging
 import argparse
 from time import sleep
+from io import FileIO
 
 import yaml
 from prometheus_client import start_http_server
@@ -16,7 +17,7 @@ import vault_monitor.expiration_monitor.create_monitors as expiration
 # pylint: disable=duplicate-code,too-many-arguments,too-many-locals
 
 
-def configure_and_launch(config_file, log_level="INFO"):
+def configure_and_launch(config_file: FileIO, log_level: str="INFO") -> None:
     """
     Read configuration file, load the specified monitors, configure exporter and enter main loop.
     """
@@ -42,7 +43,7 @@ def configure_and_launch(config_file, log_level="INFO"):
         sleep(config.get("refresh_interval", 30))
 
 
-def main():
+def main() -> None:
     """
     Get user arguments and launch the exporter
     """
@@ -50,7 +51,7 @@ def main():
     configure_and_launch(args.config_file, args.logging)
 
 
-def handle_args():
+def handle_args() -> argparse.Namespace:
     """
     Handles arg parser, returning the args object it provides.
     """
