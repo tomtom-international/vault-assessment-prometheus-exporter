@@ -90,7 +90,7 @@ def set_expiration(
 
     if response.status_code == 405:
         warnings.warn(
-            "Received 405 error when attempting to PATCH metadata, using GET+PUT instead. This indicates an older version of Vault is in us (<10), support will eventually be dropped from this tool.",
+            "Received 405 error when attempting to PATCH metadata, using GET+PUT instead. This indicates an older version of Vault is in use (<10), support will eventually be dropped from this tool.",
             DeprecationWarning,
         )
         response = requests.get(
