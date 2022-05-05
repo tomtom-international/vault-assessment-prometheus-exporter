@@ -5,12 +5,19 @@ description = "Prometheus exporter to monitor custom metadata for KV2 secrets fo
 authors = ["Eugene Davis <eugene.davis@tomtom.com>"]
 
 packages = [
-    { include = "vem" },
-    { include = "*.py" },
+    { include = "vault_monitor" },
 ]
+
+[tool.poetry.scripts]
+start_exporter = 'vault_monitor.scripts.start_exporter:main'
+set_expiration = 'vault_monitor.scripts.set_expiration:main'
 
 [tool.poetry.dependencies]
 python = "^3.8"
+hvac = "0.11.2"
+prometheus-client = "0.14.1"
+requests = "2.27.1"
+PyYAML = "6.0"
 
 [tool.poetry.dev-dependencies]
 black = "22.3.0"
@@ -18,6 +25,8 @@ mypy = "0.942"
 pylint = "2.13.7"
 pytest = "7.1.1"
 pytest-cov = "3.0.0"
+types-requests = "2.27.25"
+types-PyYAML = "6.0.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -29,8 +38,14 @@ line-length = 200
 
 
 [tool.mypy]
+disallow_untyped_defs = true
+explicit_package_bases = true
+namespace_packages = true
+exclude = 'tests'
 
-[[tool.mypy.overrides]]
+
+[[tool.mypy.overrides]] 
+module = 'hvac'
 ignore_missing_imports = true
 
 
@@ -130,9 +145,11 @@ max-nested-blocks = 5
 [tool.pylint.FORMAT]
 max-line-length = 200
 max-module-lines = 1000
+max-args = 10
 
 [tools.pylint.SIMILARITIES]
 min-similarity-lines = 4
+ignore-imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.2.5"
