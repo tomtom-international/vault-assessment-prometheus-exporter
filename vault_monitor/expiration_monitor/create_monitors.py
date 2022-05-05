@@ -27,7 +27,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationM
         service_prometheus_labels = deepcopy(default_prometheus_labels)
         service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
         if not check_prometheus_labels(prometheus_label_keys, service_prometheus_labels):
-            raise RuntimeError(f"expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
+            raise ValueError(f"expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
 
         for secret in service_config.get("secrets"):
             secret_paths = []
