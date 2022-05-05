@@ -21,34 +21,33 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationM
     default_metadata_filenames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
 
     secret_monitors = []
-    for secret_config in config.get("services", {}):
-        for service, service_config in secret_config.items():
-            LOGGER.info("Configuring monitoring for service %s", service)
-            # Use deepcopy since dicts are handled by ref and tend to get overwritten otherwise
-            service_prometheus_labels = deepcopy(default_prometheus_labels)
-            service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
-            if not check_prometheus_labels(prometheus_label_keys, service_prometheus_labels):
-                raise RuntimeError(f"expiration_monitoring {service} configures prometheus_labels witha key(s) which is not in the globally configured prometheus labels!")
+    for service_config in config.get("services", {}):
+        LOGGER.info("Configuring monitoring for service %s", service_config["name"])
+        # Use deepcopy since dicts are handled by ref and tend to get overwritten otherwise
+        service_prometheus_labels = deepcopy(default_prometheus_labels)
+        service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
+        if not check_prometheus_labels(prometheus_label_keys, service_prometheus_labels):
+            raise RuntimeError(f"expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
 
-            for secret in service_config.get("secrets"):
-                secret_paths = []
-                if not secret.get("recursive", False):
-                    secret_paths.append(secret.get("secret_path"))
-                else:
-                    secret_paths = recurse_secrets(mount_point=secret.get("mount_point"), secret_path=secret.get("secret_path"), vault_client=vault_client)
+        for secret in service_config.get("secrets"):
+            secret_paths = []
+            if not secret.get("recursive", False):
+                secret_paths.append(secret.get("secret_path"))
+            else:
+                secret_paths = recurse_secrets(mount_point=secret.get("mount_point"), secret_path=secret.get("secret_path"), vault_client=vault_client)
 
-                for secret_path in secret_paths:
-                    LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
-                    monitor = ExpirationMonitor(
-                        secret.get("mount_point"),
-                        secret_path,
-                        vault_client,
-                        service,
-                        service_prometheus_labels,
-                        prometheus_label_keys,
-                        service_config.get("metadata_fieldnames", default_metadata_filenames),
-                    )
-                    secret_monitors.append(monitor)
+            for secret_path in secret_paths:
+                LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
+                monitor = ExpirationMonitor(
+                    secret.get("mount_point"),
+                    secret_path,
+                    vault_client,
+                    service_config["name"],
+                    service_prometheus_labels,
+                    prometheus_label_keys,
+                    service_config.get("metadata_fieldnames", default_metadata_filenames),
+                )
+                secret_monitors.append(monitor)
 
     return secret_monitors
 
@@ -79,3 +78,78 @@ def check_prometheus_labels(configured_label_keys: List[str], proposed_labels: D
         if key not in configured_label_keys:
             return False
     return True
+
+
+def get_configuration_schema() -> Dict:
+    """
+    Return the configuration schema for secrets monitoring.
+    """
+    config_schema = {
+        "expiration_monitoring": {
+            "meta": {"description": "Configuration for expiration monitor module."},
+            "type": "dict",
+            "schema": {
+                "metadata_fieldnames": {
+                    "type": "dict",
+                    "nullable": True,
+                    "schema": {
+                        "last_renewal_timestamp": {"type": "string"},
+                        "expiration_timestamp": {"type": "string"},
+                    },
+                    "meta": {"description": "Custom fieldnames to use for reading the expiration metadata."},
+                },
+                "prometheus_labels": {
+                    "type": "dict",
+                    "nullable": True,
+                    "keysrules": {"type": "string", "forbidden": ["secret_path", "mount_point", "service"]},
+                    "meta": {"description": "Labels to set in the Prometheus metrics."},
+                },
+                "services": {
+                    "type": "list",
+                    "required": True,
+                    "nullable": False,
+                    "meta": {"description": "List of services from which secrets will be monitored"},
+                    "schema": {
+                        "type": "dict",
+                        "schema": {
+                            "name": {"type": "string", "meta": {"description": "Name of service."}},
+                            "metadata_fieldnames": {
+                                "type": "dict",
+                                "nullable": True,
+                                "meta": {"description": "Custom fieldnames to use for reading the expiration metadata."},
+                                "schema": {"last_renewal_timestamp": {"type": "string"}, "expiration_timestamp": {"type": "string"}},
+                            },
+                            "prometheus_labels": {
+                                "type": "dict",
+                                "nullable": True,
+                                "dependencies": "^expiration_monitoring.prometheus_labels",
+                                "keysrules": {"type": "string", "forbidden": ["secret_path", "mount_point", "service"]},
+                                "meta": {"description": "Labels to set in the Prometheus metrics. All of the keys must already exist in the global prometheus_labels."},
+                            },
+                            "secrets": {
+                                "type": "list",
+                                "required": True,
+                                "nullable": False,
+                                "meta": {"description": "List of secrets to monitor."},
+                                "schema": {
+                                    "type": "dict",
+                                    "schema": {
+                                        "mount_point": {
+                                            "type": "string",
+                                            "required": True,
+                                            "nullable": False,
+                                            "meta": {"description": "Mount point (secret engine) secret resides in. Must be a kv2 secret engine."},
+                                        },
+                                        "secret_path": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Path to the secret (minus the mount_point)."}},
+                                        "recursive": {"type": "boolean", "nullable": False, "meta": {"description": "Recursively monitor all secrets at or below the secret_path."}},
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    }
+
+    return config_schema
