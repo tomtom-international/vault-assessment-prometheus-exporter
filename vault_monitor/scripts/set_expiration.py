@@ -44,7 +44,7 @@ def handle_args() -> argparse.Namespace:
     expiration_group.add_argument("--days", default=0, type=int, help="Set the number of days before expiration.")
     expiration_group.add_argument("--hours", default=0, type=int, help="Set the number of hours before expiration.")
     expiration_group.add_argument("--minutes", default=0, type=int, help="Set the number of minutes before expiration.")
-    expiration_group.add_argument("--seconds", default=0, type=int, help="Set the number of minutes before expiration.")
+    expiration_group.add_argument("--seconds", default=0, type=int, help="Set the number of seconds before expiration.")
 
     fieldnames_group = parser.add_argument_group(
         title="Fieldnames", description="Configure the fieldnames to use (optional).\nThese must be matched by the exporter configuration for expiration monitoring."
