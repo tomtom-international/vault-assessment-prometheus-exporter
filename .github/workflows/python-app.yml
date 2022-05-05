@@ -31,11 +31,11 @@ jobs:
     - name: Check formatting
       run: poetry run black --check .
 
+    - name: Check pylint
+      run: poetry run pylint --rcfile pyproject.toml vault_monitor
+
     - name: Check typing
       run: poetry run mypy --config-file pyproject.toml .
-
-    - name: Check pylint
-      run: poetry run pylint --rcfile pyproject.toml *.py vem
 
     - name: Execute tests
       run: poetry run pytest --cov=vem --cov-fail-under $REQUIRED_COVERAGE
