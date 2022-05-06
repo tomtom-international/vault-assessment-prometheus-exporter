@@ -104,7 +104,8 @@ def get_client_with_approle_auth(config: Dict[str, str], address: str, namespace
                     secret_id = secret_id_file.read()
 
     client = hvac.Client(url=address, namespace=namespace)
-    return client.auth.approle.login(role_id=role_id, secret_id=secret_id)
+    client.auth.approle.login(role_id=role_id, secret_id=secret_id)
+    return client
 
 
 def get_client_with_kubernetes_auth(config: Dict[str, str], address: str, namespace: str) -> hvac.Client:
@@ -116,7 +117,8 @@ def get_client_with_kubernetes_auth(config: Dict[str, str], address: str, namesp
     with open(jwt_file_path, "r", encoding="UTF8") as jwt_file:
         jwt = jwt_file.read()
     client = hvac.Client(url=address, namespace=namespace)
-    return client.auth_kubernetes(mount_point, jwt)
+    client.auth_kubernetes(mount_point, jwt)
+    return client
 
 
 def get_client_with_token_auth(config: Dict[str, str], address: str, namespace: str) -> hvac.Client:

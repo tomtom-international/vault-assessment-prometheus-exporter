@@ -34,6 +34,7 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
     monitors += expiration.create_monitors(expiration_monitoring_config, vault_client)
 
     start_http_server(config.get("port", 9935))
+    print("Running on http://localhost:9935")
 
     while True:
         for monitor in monitors:
