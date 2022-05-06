@@ -39,3 +39,6 @@ jobs:
 
     - name: Execute tests
       run: poetry run pytest --cov=vem --cov-fail-under $REQUIRED_COVERAGE
+
+    - name: Execute Bandit Security Checks
+      run: poetry run bandit -r vault_monitor
