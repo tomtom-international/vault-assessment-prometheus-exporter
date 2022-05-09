@@ -123,7 +123,6 @@ def get_approle_valid_combinations() -> List[Dict[str, Dict[str, str]]]:
 
     rules = {"type": "string"}
 
-
     for role_id_value in role_id_values:
         for secret_id_value in secret_id_values:
             combo = {role_id_value: rules, secret_id_value: rules, "mount_point": rules}
