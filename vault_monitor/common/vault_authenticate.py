@@ -81,6 +81,7 @@ def get_client_with_approle_auth(config: Dict[str, str], address: str, namespace
     """
     Returns an authenticated Vault client with approle authentication.
     """
+    mount_point = config.get("mount_point", None)
     role_id = config.get("role_id", None)
     if not role_id:
         role_id_variable = config.get("role_id_variable", None)
@@ -104,7 +105,7 @@ def get_client_with_approle_auth(config: Dict[str, str], address: str, namespace
                     secret_id = secret_id_file.read()
 
     client = hvac.Client(url=address, namespace=namespace)
-    client.auth.approle.login(role_id=role_id, secret_id=secret_id)
+    client.auth.approle.login(role_id=role_id, secret_id=secret_id, mount_point=mount_point)
     return client
 
 
