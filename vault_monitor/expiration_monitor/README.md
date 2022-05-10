@@ -7,6 +7,7 @@ This module monitors custom metadata for Vault secrets to allow easy maintenance
 The `set_expiration` script can set the expiration data based on input provided (and can be imported/used as an example for automation).
 It is capable of setting custom metadata fieldnames.
 If you installed via poetry, you can execute `poetry run set_expiration -h` (or from a poetry shell just `set_expiration`) to see usage details.
+If not install via poetry, use [vault_monitor/expiration_monitor/set_expiration.py](vault_monitor/expiration_monitor/set_expiration.py).
 
 ## Configuration
 
