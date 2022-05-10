@@ -2,6 +2,12 @@
 
 This module monitors custom metadata for Vault secrets to allow easy maintenance of secret expiration for non-dynamic secret types (i.e. KeyVault v2 secrets).
 
+## Set Expiration Command
+
+The `set_expiration` script can set the expiration data based on input provided (and can be imported/used as an example for automation).
+It is capable of setting custom metadata fieldnames.
+If you installed via poetry, you can execute `poetry run set_expiration -h` (or from a poetry shell just `set_expiration`) to see usage details.
+
 ## Configuration
 
 Configuration is set within the main configuration yaml file, under the key `expiration_monitoring`
