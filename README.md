@@ -61,3 +61,7 @@ Kubernetes configuration allows using the `jwt` token provided by a Kuberenetes 
 
 * `token_file` - path to the token file, defaults to /var/run/secrets/kubernetes.io/serviceaccount/token
 * `mount_point` - mount point in Vault for the kubernetes authentication to use, `kubernetes` by default
+
+## Modules
+
+* [Expiration Monitor](vault_monitor/expiration_monitor/README.md) - monitor secrets in KV2 engines for expiration
