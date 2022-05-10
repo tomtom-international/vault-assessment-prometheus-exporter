@@ -11,7 +11,7 @@ packages = [
 
 [tool.poetry.scripts]
 start_exporter = 'vault_monitor.scripts.start_exporter:main'
-set_expiration = 'vault_monitor.scripts.set_expiration:main'
+set_expiration = 'vault_monitor.expiration_monitor.set_expiration:main'
 
 [tool.poetry.dependencies]
 python = "^3.8"
