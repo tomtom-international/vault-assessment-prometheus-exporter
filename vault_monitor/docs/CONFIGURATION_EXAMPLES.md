@@ -13,7 +13,7 @@ vault:
 
 ## Complete Simple Configuration using Token Authentication for Expiration Monitoring
 
-An example of the absolute bare-minimun configuration to monitor a single secret.
+An example of the absolute bare minimum configuration to monitor a single secret.
 
 ```yaml
 vault:
