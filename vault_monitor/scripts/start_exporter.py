@@ -45,15 +45,18 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
     expiration_monitoring_config = config.get("expiration_monitoring", {})
     monitors += expiration.create_monitors(expiration_monitoring_config, vault_client)
 
-    start_http_server(config.get("port", 9935))
-    print("Running on http://localhost:9935")
+    refresh_interval = config.get("refresh_interval", 30)
+    port = config.get("port", 9935)
+
+    start_http_server(port)
+    print(f"Running on http://localhost:{port}")
 
     while True:
         for monitor in monitors:
             monitor.update_metrics()
 
         # Default to 30 seconds, configurable
-        sleep(config.get("refresh_interval", 30))
+        sleep(refresh_interval)
 
 
 def main() -> None:
