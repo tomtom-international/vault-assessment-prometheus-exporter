@@ -7,7 +7,7 @@ import requests
 import hvac
 from prometheus_client import Gauge
 
-from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
+from vault_monitor.secret_expiration_monitor.vault_time import ExpirationMetadata
 
 ExpirationMonitorType = TypeVar("ExpirationMonitorType", bound="ExpirationMonitor")  # pylint: disable=invalid-name
 

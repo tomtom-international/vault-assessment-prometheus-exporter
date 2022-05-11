@@ -1,4 +1,4 @@
-import vault_monitor.expiration_monitor
+import vault_monitor.secret_expiration_monitor
 
 
 def test_test():

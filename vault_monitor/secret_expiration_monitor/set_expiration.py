@@ -9,7 +9,7 @@ import warnings
 import requests
 
 from vault_monitor.common.vault_authenticate import get_vault_client_for_user
-from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
+from vault_monitor.secret_expiration_monitor.vault_time import ExpirationMetadata
 
 LOGGER = logging.getLogger("set_expiration")
 
