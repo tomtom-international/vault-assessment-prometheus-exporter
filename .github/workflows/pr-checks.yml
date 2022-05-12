@@ -56,7 +56,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Test Build
+    - name: Test Image Build
       uses: docker/build-push-action@v2
       with:
         context: .
@@ -64,6 +64,8 @@ jobs:
         load: true
         tags: build-exporter:test
 
-    - uses: Azure/container-scan@v0
+    - name: Scan Image
+      uses: Azure/container-scan@v0.1
       with:
         image-name: build-exporter:test
+        run-quality-checks: false # Disabled for now due to bug https://github.com/Azure/container-scan/issues/133 (and partially duplicating linting anyway)
