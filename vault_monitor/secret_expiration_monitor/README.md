@@ -1,4 +1,4 @@
-# Expiration Monitor Module
+# Secret Expiration Monitor Module
 
 This module monitors custom metadata for Vault secrets to allow easy maintenance of secret expiration for non-dynamic secret types (i.e. KeyVault v2 secrets).
 
@@ -11,7 +11,7 @@ If not install via poetry, use [vault_monitor/expiration_monitor/set_expiration.
 
 ## Configuration
 
-Configuration is set within the main configuration yaml file, under the key `expiration_monitoring`
+Configuration is set within the main configuration yaml file, under the key `secret_expiration_monitoring`
 
 ### Metadata Fieldnames
 
