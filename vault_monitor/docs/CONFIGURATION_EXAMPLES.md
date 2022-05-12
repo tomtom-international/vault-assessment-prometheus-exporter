@@ -21,7 +21,7 @@ vault:
   authentication:
     token:
 
-expiration_monitoring:
+secret_expiration_monitoring:
     - name: simple_service
       secrets:
       - mount_point: secrets
@@ -48,7 +48,7 @@ vault:
 refresh_interval: 10 # default is 30 seconds
 port: 8350 # default is 9935
 
-expiration_monitoring:
+secret_expiration_monitoring:
     metadata_fieldnames:
       last_renewal_timestamp: "first_last_renewal_timestamp" # default is last_renewal_timestamp
       expiration_timestamp: "first_expiration_timestamp" # default is expiration_timestamp

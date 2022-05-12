@@ -14,7 +14,7 @@ from cerberus import Validator
 
 from vault_monitor.common.vault_authenticate import get_authenticated_client
 
-import vault_monitor.expiration_monitor.create_monitors as expiration
+import vault_monitor.secret_expiration_monitor.create_monitors as expiration
 
 EXPORTER_MODULES = [expiration]
 
@@ -42,8 +42,8 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
 
     monitors = []
 
-    expiration_monitoring_config = config.get("expiration_monitoring", {})
-    monitors += expiration.create_monitors(expiration_monitoring_config, vault_client)
+    secret_expiration_monitoring_config = config.get("secret_expiration_monitoring", {})
+    monitors += expiration.create_monitors(secret_expiration_monitoring_config, vault_client)
 
     refresh_interval = config.get("refresh_interval", 30)
     port = config.get("port", 9935)
