@@ -7,7 +7,7 @@ from typing import List, Dict
 
 from hvac import Client as hvac_client
 
-from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
+from vault_monitor.secret_expiration_monitor.expiration_monitor import ExpirationMonitor
 
 LOGGER = logging.getLogger("secret-monitor")
 
@@ -27,7 +27,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationM
         service_prometheus_labels = deepcopy(default_prometheus_labels)
         service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
         if not check_prometheus_labels(prometheus_label_keys, service_prometheus_labels):
-            raise ValueError(f"expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
+            raise ValueError(f"secret_expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
 
         for secret in service_config.get("secrets"):
             secret_paths = []
@@ -85,7 +85,7 @@ def get_configuration_schema() -> Dict:
     Return the configuration schema for secrets monitoring.
     """
     config_schema = {
-        "expiration_monitoring": {
+        "secret_expiration_monitoring": {
             "meta": {"description": "Configuration for expiration monitor module."},
             "type": "dict",
             "schema": {
@@ -122,7 +122,7 @@ def get_configuration_schema() -> Dict:
                             "prometheus_labels": {
                                 "type": "dict",
                                 "nullable": True,
-                                "dependencies": "^expiration_monitoring.prometheus_labels",
+                                "dependencies": "^secret_expiration_monitoring.prometheus_labels",
                                 "keysrules": {"type": "string", "forbidden": ["secret_path", "mount_point", "service"]},
                                 "meta": {"description": "Labels to set in the Prometheus metrics. All of the keys must already exist in the global prometheus_labels."},
                             },
