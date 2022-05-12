@@ -81,7 +81,7 @@ def get_client_with_approle_auth(config: Dict[str, str], address: str, namespace
     """
     Returns an authenticated Vault client with approle authentication.
     """
-    mount_point = config.get("mount_point", None)
+    mount_point = config.get("mount_point", "approle")
     role_id = config.get("role_id", None)
     if not role_id:
         role_id_variable = config.get("role_id_variable", None)
