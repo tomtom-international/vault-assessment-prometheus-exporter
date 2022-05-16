@@ -2,7 +2,9 @@
 
 Provides a prometheus exporter for monitoring aspects of a running HashiCorp Vault server.
 
-## Installation
+## Deploy
+
+### Direct Installation
 
 At present, the easiest method to install and run is to use [poetry](https://python-poetry.org/).
 To install and run, do the following:
