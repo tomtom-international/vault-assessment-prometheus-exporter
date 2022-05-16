@@ -1,0 +1,76 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REQUIRED_COVERAGE: 0
+
+jobs:
+  python:
+    name: python checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install Poetry
+      run: pip install poetry
+
+    - name: Install requirements
+      run: poetry install
+
+    - name: Check formatting
+      run: poetry run black --check .
+
+    - name: Check pylint
+      run: poetry run pylint --rcfile pyproject.toml vault_monitor
+
+    - name: Check typing
+      run: poetry run mypy --config-file pyproject.toml .
+
+    - name: Execute tests
+      run: poetry run pytest --cov=vem --cov-fail-under $REQUIRED_COVERAGE
+
+    - name: Execute Bandit Security Checks
+      run: poetry run bandit -r vault_monitor
+
+  docker:
+    name: docker checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2 
+    - uses: hadolint/hadolint-action@v2.0.0
+      with:
+        dockerfile: Dockerfile
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Test Image Build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        load: true
+        tags: build-exporter:test
+
+    - name: Scan Image
+      uses: Azure/container-scan@v0.1
+      with:
+        image-name: build-exporter:test
+        run-quality-checks: false # Disabled for now due to bug https://github.com/Azure/container-scan/issues/133 (and partially duplicating linting anyway)
+
+    - name: Test Cross Platform Build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64,linux/arm/v7
