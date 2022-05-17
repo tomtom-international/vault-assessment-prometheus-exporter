@@ -5,5 +5,9 @@ tag = False
 message = Bump version: {current_version} → {new_version}
 
 [bumpversion:file:pyproject.toml]
-search = version: {current_version}
-replace = version: {new_version}
+search = version = "current_version}"
+replace = version = "new_version}"
+
+[bumpversion:file:.github/workflows/release.yml]
+search = tags: tomtomcom/vault-expiration-monitor:build-exporter:{current_version}
+replace = tags: tomtomcom/vault-expiration-monitor:build-exporter:{new_version}
