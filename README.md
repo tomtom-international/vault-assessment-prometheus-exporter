@@ -1,5 +1,8 @@
 # Vault Monitor Exporter
 
+[![PR Checks](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml)
+[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+
 Provides a prometheus exporter for monitoring aspects of a running HashiCorp Vault server.
 
 ## Deploy
