@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  VERSION: 0.1.0
+
 jobs:
   docker:
     name: docker build
@@ -28,4 +31,15 @@ jobs:
       with:
         context: .
         push: true
-        tags: tomtomcom/vault-expiration-monitor:build-exporter:0.1.0
+        tags: tomtomcom/vault-expiration-monitor:$VERSION
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      with:
+        tag_name: ${{ GITHUB_REF }}
+        release_name: Release $VERSION
+        draft: false
+        prerelease: true
