@@ -74,3 +74,14 @@ jobs:
       with:
         context: .
         platforms: linux/amd64,linux/arm64,linux/arm/v7
+
+  security:
+    name: security checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+    - name: gitleaks-action
+      uses: zricethezav/gitleaks-action@master
