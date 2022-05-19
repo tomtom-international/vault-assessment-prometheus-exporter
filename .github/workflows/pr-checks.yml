@@ -82,7 +82,7 @@ jobs:
     steps:
     - name: Get current version
       id: current-version
-      run: echo "::set-output name=version::$(bump2version --list --dry-run --config-file .bump2version patch | grep current_version= | sed -r s,"^.*=",,)"
+      run: echo "::set-output name=version::$(bump2version --list --dry-run patch | grep current_version= | sed -r s,"^.*=",,)"
 
     - name: Checkout ${{ github.base_ref }}
       uses: actions/checkout@v2
@@ -92,9 +92,9 @@ jobs:
     - name: Get ${{ github.base_ref }} version
       id: old-version
       run: |
-        echo "::set-output name=version::$(bump2version --dry-run --list --allow-dirty --config-file .bump2version patch | grep current_version= | sed -r s,"^.*=",,)"
+        echo "::set-output name=version::$(bump2version --dry-run --list --allow-dirty patch | grep current_version= | sed -r s,"^.*=",,)"
     - name: Checkout current branch
       uses: actions/checkout@v2
 
     - name: Check version has been bumped
-      run: "python ..github/workflows/version_check.py --current-branch ${{ steps.current-version.outputs.version }} --target-branch ${{ steps.old-version.outputs.version }}"
+      run: "python .github/workflows/version_check.py --current-branch ${{ steps.current-version.outputs.version }} --target-branch ${{ steps.old-version.outputs.version }}"
