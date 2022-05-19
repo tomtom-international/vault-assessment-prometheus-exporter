@@ -100,7 +100,7 @@ jobs:
     - name: Get ${{ github.base_ref }} version
       id: old-version
       run: |
-        echo "::set-output name=version::$(poetry run bump2version --dry-run --list --allow-dirty patch | grep current_version= | sed -r s,"^.*=",,)"
+        echo "::set-output name=version::$(poetry run bump2version --dry-run --no-configured-files --list --allow-dirty patch | grep current_version= | sed -r s,"^.*=",,)"
     - name: Checkout current branch
       uses: actions/checkout@v2
 
