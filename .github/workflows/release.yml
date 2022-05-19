@@ -31,7 +31,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: tomtomcom/vault-expiration-monitor:$VERSION
+        tags: tomtomcom/vault-expiration-monitor:${{ env.VERSION }}
 
     - name: Create Release
       id: create_release
@@ -40,6 +40,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         tag_name: $GITHUB_REF
-        release_name: Release $VERSION
+        release_name: Release ${{ env.VERSION }}
         draft: false
         prerelease: true
