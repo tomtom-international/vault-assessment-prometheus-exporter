@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sp-devsup-vault-expiration-monitoring"
-version = "0.1.0"
+version = "0.2.0"
 description = "Prometheus exporter to monitor custom metadata for KV2 secrets for (self-imposed) expiration."
 authors = ["Eugene Davis <eugene.davis@tomtom.com>"]
 readme = "README.md"
@@ -30,6 +30,7 @@ pytest-cov = "3.0.0"
 types-requests = "2.27.25"
 types-PyYAML = "6.0.7"
 bandit = "^1.7.4"
+bump2version = "^1.0.1"
 
 
 [build-system]

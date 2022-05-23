@@ -91,3 +91,35 @@ jobs:
       with:
         image-name: build-exporter:test
         run-quality-checks: false # Disabled for now due to bug https://github.com/Azure/container-scan/issues/133 (and partially duplicating linting anyway)
+
+  version:
+    name: version check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2 
+
+    - name: Install Poetry
+      run: pip install poetry
+
+    - name: Install requirements
+      run: poetry install
+
+    - name: Get current version
+      id: current-version
+      run: echo "::set-output name=version::$(poetry run bump2version --list --dry-run patch | grep current_version= | sed -r s,"^.*=",,)"
+
+    - name: Checkout ${{ github.base_ref }}
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.base_ref }}
+
+    - name: Get ${{ github.base_ref }} version
+      id: old-version
+      run: |
+        echo "::set-output name=version::$(poetry run bump2version --dry-run --no-configured-files --list --allow-dirty patch | grep current_version= | sed -r s,"^.*=",,)"
+    - name: Checkout current branch
+      uses: actions/checkout@v2
+
+    - name: Check version has been bumped
+      run: "python .github/workflows/version_check.py --current-branch ${{ steps.current-version.outputs.version }} --target-branch ${{ steps.old-version.outputs.version }}"
