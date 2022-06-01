@@ -1,4 +1,8 @@
-# Maintainers
+# Support
+
+For bugs or minor security concerns please open in issue.
+
+For other issues, contact the following:
 
 * Eugene Davis [eugene.davis@tomtom.com](mailto:eugene.davis@tomtom.com)
 * Dawid Dłubek [dawid.dlubek@tomtom.com](mailto:dawid.dlubek@tomtom.com)
