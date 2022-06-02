@@ -70,7 +70,3 @@ Kubernetes configuration allows using the `jwt` token provided by a Kuberenetes 
 ## Modules
 
 * [Expiration Monitor](vault_monitor/expiration_monitor/README.md) - monitor secrets in KV2 engines for expiration
-
-## Development
-
-Versions are managed via [bump2version](https://github.com/c4urself/bump2version), all PRs must increase the version before the are mergable.
