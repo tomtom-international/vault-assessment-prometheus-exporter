@@ -1,15 +1,56 @@
-# Vault Monitor Exporter
+# Vault Assesment Prometheus Exporter
 
 [![PR Checks](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 Provides a prometheus exporter for monitoring aspects of a running HashiCorp Vault server.
 
-## Deploy
+At the moment, the sole focus is on monitoring KV2 static secrets for expiration based on custom metadata, however it has been designed with the intent to allow modular creation of additional monitors, e.g. for monitoring other types of secrets engines or authentication types for rotation needs, or for other at-a-glance metrics.
+
+## Deploying Vault Assesment Prometheus Exporter
+
+## Vault Configuration
+
+Before deploying the exporter, you will need to configure access for it into Vault.
+
+### Supported Authentication methods
+
+The exporter supports three authentication methods:
+
+* [token](https://www.vaultproject.io/docs/internals/token) (intended primarily for development)
+* [approle](https://www.vaultproject.io/docs/auth/approle)
+* [kubernetes](https://www.vaultproject.io/docs/auth/kubernetes)
+
+Additional authentication methods should be relatively easy to add due to usage of the [hvac](https://hvac.readthedocs.io/en/stable/overview.html) module, please feel free to open an issue or a pull request with any you might need.
+
+### Policy
+
+The exporter requires the `read` capability access to the metadata of the monitored secrets. Additionally, if you are using the recursive function to monitor multiple secrets in a path, you will need to provide the `list` capability.
+
+A sample policy for a secret in the KV2 engine `secret` at path `some/example/secret` would need a policy like:
+
+```hcl
+path "secret/metadata/some/example/secret" {
+  capabilities = [ "read" ]
+}
+```
+
+To recursively monitor at the `example` level, it would look like:
+
+```hcl
+path "secret/metadata/some/example/**" {
+  capabilities = [ "read", "list" ]
+}
+```
+
+### Docker Image
+
+A Docker image can be found on Dockerhub at `tomtomcom/vault-expiration-monitor`.
+The location of the secret file can be set with the `CONFIG_FILE` environmental variable, any other environment variables that may be required (e.g. for approles) are based on configuration.
 
 ### Direct Installation
 
-At present, the easiest method to install and run is to use [poetry](https://python-poetry.org/).
+To install and run  locally, use [poetry](https://python-poetry.org/).
 To install and run, do the following:
 
 1. `poetry install`
