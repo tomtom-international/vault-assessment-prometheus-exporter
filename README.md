@@ -1,4 +1,4 @@
-# Vault Monitor Exporter
+# VAPE - Vault Assesment Prometheus Exporter 
 
 [![PR Checks](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
@@ -17,7 +17,7 @@ To install and run, do the following:
 
 ## Basic Configuration
 
-Basic configuration for the exporter configures access to Vault, as well as refresh rate and the port of the exporter.
+Basic configuration for the exporter configures access to HashiCorp Vault, as well as refresh rate and the port of the exporter.
 The configuration is stored in `config.yaml` (or can be specified in another file with `--config_file`), and is validated for correctness after being loaded.
 
 The schema for the configuration can be shown with `start_exporter --show_schema`.
