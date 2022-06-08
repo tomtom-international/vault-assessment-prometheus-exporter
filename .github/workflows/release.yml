@@ -41,12 +41,13 @@ jobs:
         artifact-name: sbom.spdx
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1.0.0
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        files: sbom.spdx
         tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
+        name: Release ${{ env.VERSION }}
         draft: false
         prerelease: true
+        token: ${{ secrets.GITHUB_TOKEN }}
