@@ -9,7 +9,7 @@ env:
   VERSION: 0.3.5
 
 jobs:
-  docker:
+  release:
     name: docker build
     runs-on: ubuntu-latest
 
@@ -35,6 +35,10 @@ jobs:
         push: true
         tags: tomtomcom/vault-expiration-monitor:${{ env.VERSION }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
+
+    - uses: anchore/sbom-action@v0
+      with:
+        artifact-name: sbom.spdx
 
     - name: Create Release
       id: create_release
