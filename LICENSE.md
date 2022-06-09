@@ -176,4 +176,4 @@
 
    END OF TERMS AND CONDITIONS
 
-   Copyright (C) 2022 Eugene Davis TomTom N.V. or one of its subsidiaries
+   Copyright (C) 2022 TomTom N.V. or one of its subsidiaries
