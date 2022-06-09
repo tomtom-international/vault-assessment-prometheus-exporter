@@ -1,6 +1,6 @@
 # Vault Assessment Prometheus Exporter
 
-[![PR Checks](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml)
+[![Release](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/release.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/release.yml)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 Provides a prometheus exporter for monitoring aspects secrets stored on a running HashiCorp Vault server - in contrast to the built-in metrics which focus on the operation of the server itself.
@@ -19,9 +19,9 @@ Before deploying the exporter, you will need to configure access for it into Vau
 If you are running an enterprise server, you will want to run an exporter per namespace, utilizing the exporter with root namespace privileges is discouraged.
 
 Configuration on the Vault-side will require configuring authentication access and associating an appropriate Vault policy.
-Please see below for support authentication methods as well as details and examples on policy configuration.
+Please [Supported Authentication Methods](#supported-authentication-methods) for configuring authentication and [Required Policy](#required-policy) for details and instructions and the policy needed to run the exporter.
 
-#### Supported Authentication methods
+#### Supported Authentication Methods
 
 The exporter supports three authentication methods for its connection to HashiCorp Vault:
 
@@ -31,7 +31,7 @@ The exporter supports three authentication methods for its connection to HashiCo
 
 Additional authentication methods should be relatively easy to add due to usage of the [hvac](https://hvac.readthedocs.io/en/stable/overview.html) module, please feel free to open an issue or a pull request with any you might need.
 
-#### Policy
+#### Required Policy
 
 The exporter requires the `read` capability access to the metadata of the monitored secrets.
 Additionally, if you are using the recursive function to monitor multiple secrets in a path, you will need to provide the `list` capability.
