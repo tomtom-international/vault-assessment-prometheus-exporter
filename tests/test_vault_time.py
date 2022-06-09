@@ -5,6 +5,7 @@ from pytest_mock import mocker
 
 from vault_monitor.secret_expiration_monitor.vault_time import ExpirationMetadata
 
+
 @pytest.mark.parametrize("weeks, days, hours, minutes, seconds", [(1, 1, 1, 2, 4), (8, 10, 1105, 20, 4444)])
 def test_from_duration_get_seralized_expiration(weeks, days, hours, minutes, seconds):
     """
@@ -20,7 +21,7 @@ def test_from_duration_get_seralized_expiration(weeks, days, hours, minutes, sec
     # Give 50 milliseconds grace period between calling utcnow here and the code calling it
     assert datetime.datetime.fromisoformat(metadata_dict["last_renewed_timestamp"][:-1]) - last_renewed_time < datetime.timedelta(milliseconds=50)
     assert datetime.datetime.fromisoformat(metadata_dict["expiration_timestamp"][:-1]) - expiration < datetime.timedelta(milliseconds=50)
-    
+
 
 def test_from_metadata_get_seralized_expiration():
     """

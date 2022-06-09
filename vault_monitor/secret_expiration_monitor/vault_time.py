@@ -62,7 +62,6 @@ class ExpirationMetadata:
             logging.error("Failed to parse last_renewed_timestamp for %s, setting to 1970.", last_renewed_timestamp_fieldname)
             last_renewed_time = datetime.fromtimestamp(0, tz=timezone.utc)
 
-
         try:
             expiration_time = cls.__get_time_from_iso_utc(expiration_timestamp)
         except TypeError:
@@ -71,7 +70,6 @@ class ExpirationMetadata:
         except ValueError:
             logging.error("Failed to parse expiration_timestamp_field for %s, setting to 1970.", expiration_timestamp_fieldname)
             expiration_time = datetime.fromtimestamp(0, tz=timezone.utc)
-
 
         return cls(last_renewed_time, expiration_time, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
 
