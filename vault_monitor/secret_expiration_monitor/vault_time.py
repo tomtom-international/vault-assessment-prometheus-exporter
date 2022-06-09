@@ -28,8 +28,8 @@ class ExpirationMetadata:
         expiration_hours: int,
         expiration_minutes: int,
         expiration_seconds: int,
-        last_renewed_timestamp_fieldname: str,
-        expiration_timestamp_fieldname: str,
+        last_renewed_timestamp_fieldname: str = "last_renewed_timestamp",
+        expiration_timestamp_fieldname: str = "expiration_timestamp",
     ) -> ExpirationMetadataType:
         """
         Creates an instance of ExpirationMetadata from the current time for last_renewed_time and gets the expiration from duration input
