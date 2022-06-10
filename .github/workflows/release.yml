@@ -34,7 +34,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/tomtom-internal/vault-assessment-prometheus-exporter:${{ env.VERSION }}
+        tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
 
     - uses: anchore/sbom-action@v0

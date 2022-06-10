@@ -1,6 +1,6 @@
 # Vault Assessment Prometheus Exporter
 
-[![Release](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/release.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/release.yml)
+[![Release](../../actions/workflows/release.yml/badge.svg)](../../sp-devsup-vault-expiration-monitoring/actions/workflows/release.yml)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 Provides a prometheus exporter for monitoring aspects secrets stored on a running HashiCorp Vault server - in contrast to the built-in metrics which focus on the operation of the server itself.
@@ -53,7 +53,7 @@ path "secret/metadata/some/example/**" {
 
 ### Docker Image
 
-A Docker image can be found on Dockerhub at `ghcr.io/tomtom-internal/vault-assessment-prometheus-exporter`.
+A Docker image can be found at [/pkgs/container/vault-assessment-prometheus-exporter](../../pkgs/container/vault-assessment-prometheus-exporter)
 The location of the secret file can be set with the `CONFIG_FILE` environmental variable, any other environment variables that may be required (e.g. for approles) are based on configuration.
 
 ### Direct Installation
