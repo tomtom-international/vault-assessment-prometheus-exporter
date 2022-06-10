@@ -53,7 +53,7 @@ path "secret/metadata/some/example/**" {
 
 ### Docker Image
 
-A Docker image can be found on Dockerhub at `tomtomcom/vault-expiration-monitor`.
+A Docker image can be found on Dockerhub at `ghcr.io/tomtom-internal/vault-assessment-prometheus-exporter`.
 The location of the secret file can be set with the `CONFIG_FILE` environmental variable, any other environment variables that may be required (e.g. for approles) are based on configuration.
 
 ### Direct Installation
