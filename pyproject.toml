@@ -31,9 +31,8 @@ types-requests = "2.27.25"
 types-PyYAML = "6.0.7"
 bandit = "^1.7.4"
 bump2version = "^1.0.1"
-pytest-mock = "3.6.1"
+pytest-mock = "^3.7.0"
 mock = "4.0.3"
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -161,3 +160,4 @@ ignore-imports = true
 [tool.pytest.ini_options]
 minversion = "6.2.5"
 testpaths = ["tests"]
+addopts = "--cov=vault_monitor --cov-report term-missing"
