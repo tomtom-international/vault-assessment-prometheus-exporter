@@ -15,11 +15,10 @@ Additionally, a modular design has been used, to allow for integration of other 
 
 ### Vault Configuration
 
-Before deploying the exporter, you will need to configure access for it into Vault.
-If you are running an enterprise server, you will want to run an exporter per namespace, utilizing the exporter with root namespace privileges is discouraged.
-
 Configuration on the Vault-side will require configuring authentication access and associating an appropriate Vault policy.
 Please [Supported Authentication Methods](#supported-authentication-methods) for configuring authentication and [Required Policy](#required-policy) for details and instructions and the policy needed to run the exporter.
+
+**Enterprise Users:** If you are running an enterprise server with namespaces, you should run an exporter per namespace, utilizing the exporter with root namespace privileges is discouraged.
 
 #### Supported Authentication Methods
 
