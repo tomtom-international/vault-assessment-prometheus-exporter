@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  REQUIRED_COVERAGE: 0
+  REQUIRED_COVERAGE: 30
 
 jobs:
   python:
@@ -35,7 +35,7 @@ jobs:
       run: poetry run mypy --config-file pyproject.toml .
 
     - name: Execute tests
-      run: poetry run pytest --cov=vem --cov-fail-under $REQUIRED_COVERAGE
+      run: poetry run pytest --cov-fail-under $REQUIRED_COVERAGE
 
   docker:
     name: docker checks

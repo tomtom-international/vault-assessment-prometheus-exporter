@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vault-assesment-prometheus-exporter"
-version = "0.3.8"
+version = "0.3.9"
 description = "Prometheus exporter to monitor custom metadata for KV2 secrets for (self-imposed) expiration."
 authors = ["Eugene Davis <eugene.davis@tomtom.com>"]
 readme = "README.md"
@@ -31,9 +31,8 @@ types-requests = "2.27.25"
 types-PyYAML = "6.0.7"
 bandit = "^1.7.4"
 bump2version = "^1.0.1"
-pytest-mock = "3.6.1"
+pytest-mock = "^3.7.0"
 mock = "4.0.3"
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -161,3 +160,4 @@ ignore-imports = true
 [tool.pytest.ini_options]
 minversion = "6.2.5"
 testpaths = ["tests"]
+addopts = "--cov=vault_monitor --cov-report term-missing"
