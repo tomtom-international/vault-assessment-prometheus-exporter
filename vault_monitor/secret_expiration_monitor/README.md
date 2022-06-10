@@ -2,12 +2,46 @@
 
 This module monitors custom metadata for Vault secrets to allow easy maintenance of secret expiration for non-dynamic secret types (i.e. KeyVault v2 secrets).
 
-## Set Expiration Command
+## Set Expiration
+
+Expiration and last-renewal information is stored in the custom metadata for each secret monitored.
+It is recommended that you use automation (for a script that is also importable as a Python module see below), however you can also set the metadata manually via CLI or UI or in any other automation system.
+
+Both timestamps are in UTC time in the [ISO 8601 format](https://www.w3.org/TR/NOTE-datetime-970915) with the timezone (`Z`) included at the end - this matches the format the the Vault server itself uses for timestamps.
+The precision used goes to miliseconds, for example `2022-05-02T09:49:41.415869Z`
+The exporter does not support other timezones, and will currently break if the are used.
+
+## Field Info
+
+* `last_renewal_timestamp` - this should be set when the secret is created or renewed, it indicates the age of the current version of the secret. This allows tracking the age of the secret, in addition to seeing when it is marked to expire.
+* `expiration_timestamp` - this should be set the the target expiration date and time
+
+Keep in mind, both fieldnames can be customized if needed or desired, see [Metadata Fieldnames](#metadata-fieldnames)
+
+### Using the Provided Script
 
 The `set_expiration` script can set the expiration data based on input provided (and can be imported/used as an example for automation).
 It is capable of setting custom metadata fieldnames.
 If you installed via poetry, you can execute `poetry run set_expiration -h` (or from a poetry shell just `set_expiration`) to see usage details.
 If not install via poetry, use [vault_monitor/expiration_monitor/set_expiration.py](vault_monitor/expiration_monitor/set_expiration.py).
+
+When using the `set_expiration` script you will need to provide the appropriate permissions to its bound token.
+Due to the recent availability of the `patch` command ([Vault 1.10](https://www.vaultproject.io/docs/release-notes/1.10.0#kv-secrets-engine-v2-patch-operations)), this differs based on your Vault version.
+
+* Vault 1.10 requires only the `patch` command on the secret
+* Older versions require `read`, `write`, and `update` on the secret
+
+### Importing the Script as Module
+
+To use the `set_expiration` script as a module, import `vault_monitor/scripts/start_exporter.py` and call the function `set_expiration`.
+The parameters are fairly straight-forward:
+
+* `address`, and `namespace` - configures access to Vault
+* `mount_point` and `secret_path` - point to the target secret
+* `weeks`, `days`, `hours`, `minutes` and `seconds` - configure the timestamp
+* `last_renewed_timestamp_fieldname` and `expiration_timestamp_fieldname` (optional) - allow you to configure the fieldnames used
+
+Currently the Vault token is retrieved from the environment, in the near future it will be updated to require setting the token directly.
 
 ## Configuration
 
@@ -26,6 +60,8 @@ These values can be overridden per-service.
 ### Services
 
 Under the `services` key is a list of services with secrets to monitor.
+The goal of providing services is to allow the exporter to provide a label which clearly distinguishes between different services or aspects of a service - e.g. `backend` and `frontend` or `shop` and `mailing list`.
+
 A service in this context is merely a logical grouping, and beyond the fact a `service` label will be added by this name to each metric, it has no effect.
 
 Each service can contain the following:

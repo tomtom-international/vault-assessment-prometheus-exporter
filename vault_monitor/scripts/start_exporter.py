@@ -1,5 +1,5 @@
 """
-Launches Vault Assesment Prometheus Exporter
+Launches Vault Assessment Prometheus Exporter
 """
 import sys
 import logging
