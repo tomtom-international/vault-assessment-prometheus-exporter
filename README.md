@@ -74,7 +74,7 @@ The schema for the configuration can be shown with `start_exporter --show_schema
 #### General Configuration
 
 * `refresh_interval` - the interval at which the exporter should access Vault to check the expiration metadata for all secrets, by default this is 30 seconds
-* `port` - the port on which the exporter should run, by default this is
+* `port` - the port on which the exporter should run, by default this is 9937.
 
 #### Configuring Vault Access
 
