@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  VERSION: 0.3.13
+  VERSION: 0.3.14
 
 jobs:
   release:
@@ -49,5 +49,5 @@ jobs:
         tag_name: ${{ env.VERSION }}
         name: Release ${{ env.VERSION }}
         draft: false
-        prerelease: true
+        prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
