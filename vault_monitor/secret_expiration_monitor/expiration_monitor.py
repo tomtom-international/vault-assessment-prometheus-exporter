@@ -20,9 +20,7 @@ class ExpirationMonitor:
     secret_last_renewal_timestamp_gauge: Gauge
     secret_expiration_timestamp_gauge: Gauge
 
-    def __init__(
-        self, mount_point: str, secret_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str], prometheus_label_keys: List[str], metadata_fieldnames: Dict[str, str]
-    ) -> None:
+    def __init__(self, mount_point: str, secret_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str] = {}, metadata_fieldnames: Dict[str, str] = {}) -> None:
         """
         Creates an instance of the ExpirationMonitor class.
         """
@@ -32,9 +30,10 @@ class ExpirationMonitor:
         self.service = service
         # Add the secret specific labels to the provided labels
         self.prometheus_labels = {"secret_path": secret_path, "mount_point": mount_point, "service": service}
+
         self.prometheus_labels.update(prometheus_labels)
 
-        prometheus_label_keys += ["secret_path", "mount_point", "service"]
+        prometheus_label_keys = list(self.prometheus_labels.keys())
 
         self.last_renewed_timestamp_fieldname = metadata_fieldnames.get("last_renewal_timestamp", "last_renewal_timestamp")
         self.expiration_timestamp_fieldname = metadata_fieldnames.get("expiration_timestamp", "expiration_timestamp")
@@ -48,6 +47,7 @@ class ExpirationMonitor:
         """
         # Only create the metric once
         if not hasattr(cls, "secret_last_renewal_timestamp_gauge"):
+            print(prometheus_label_keys)
             cls.secret_last_renewal_timestamp_gauge = Gauge("vault_secret_last_renewal_timestamp", "Timestamp for when a secret was last updated.", prometheus_label_keys)
         if not hasattr(cls, "secret_expiration_timestamp_gauge"):
             cls.secret_expiration_timestamp_gauge = Gauge("vault_secret_expiration_timestamp", "Timestamp for when a secret should expire.", prometheus_label_keys)
