@@ -75,8 +75,6 @@ def set_expiration(
 
     expiration_info = ExpirationMetadata.from_duration(weeks, days, hours, minutes, seconds, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
 
-    
-
     LOGGER.info("Updating expiration data for secret.")
 
     # Custom metadata isn't fully supported by hvac at the moment, use requests
@@ -129,9 +127,9 @@ def main() -> None:
 
     # Get the hvac client, we will have to use requests some with the token it manages
     vault_client = get_vault_client_for_user(url=args.address, namespace=args.namespace)
-    
+
     # configure logging level
-    logging.basicConfig(level=args.logging) # take away
+    logging.basicConfig(level=args.logging)  # take away
 
     set_expiration(
         args.mount_point,
