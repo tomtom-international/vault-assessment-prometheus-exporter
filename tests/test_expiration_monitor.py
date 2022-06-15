@@ -4,6 +4,7 @@ from pytest_mock import mocker
 
 from vault_monitor.secret_expiration_monitor import expiration_monitor
 
+
 @pytest.fixture(autouse=True)
 def tear_down():
     # Let test run first
@@ -34,7 +35,6 @@ def test_basic_creation(mocker):
     ]
 
     mock_gauge.assert_has_calls(gauge_calls)
-   
 
 
 def test_custom_values_creation(mocker):
@@ -65,4 +65,3 @@ def test_custom_values_creation(mocker):
     ]
 
     mock_gauge.assert_has_calls(gauge_calls)
-
