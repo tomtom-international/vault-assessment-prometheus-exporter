@@ -20,7 +20,7 @@ class ExpirationMonitor:
     secret_last_renewal_timestamp_gauge: Gauge
     secret_expiration_timestamp_gauge: Gauge
 
-    def __init__(self, mount_point: str, secret_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str] = {}, metadata_fieldnames: Dict[str, str] = {}) -> None:
+    def __init__(self, mount_point: str, secret_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str] = None, metadata_fieldnames: Dict[str, str] = None) -> None:
         """
         Creates an instance of the ExpirationMonitor class.
         """
@@ -31,10 +31,13 @@ class ExpirationMonitor:
         # Add the secret specific labels to the provided labels
         self.prometheus_labels = {"secret_path": secret_path, "mount_point": mount_point, "service": service}
 
-        self.prometheus_labels.update(prometheus_labels)
+        if prometheus_labels is not None:
+            self.prometheus_labels.update(prometheus_labels)
 
         prometheus_label_keys = list(self.prometheus_labels.keys())
 
+        if metadata_fieldnames is None:
+            metadata_fieldnames = {}
         self.last_renewed_timestamp_fieldname = metadata_fieldnames.get("last_renewal_timestamp", "last_renewal_timestamp")
         self.expiration_timestamp_fieldname = metadata_fieldnames.get("expiration_timestamp", "expiration_timestamp")
 
