@@ -1,33 +1,39 @@
 """
-Class for monitoring secrets in Hashicorp Vault.
+Class for monitoring expiration information in HashiCorp Vault.
 """
+from abc import ABC, abstractmethod
 from typing import Dict, List, Type, TypeVar
 
 import requests
 import hvac
 from prometheus_client import Gauge
 
-from vault_monitor.secret_expiration_monitor.vault_time import ExpirationMetadata
+from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
 ExpirationMonitorType = TypeVar("ExpirationMonitorType", bound="ExpirationMonitor")  # pylint: disable=invalid-name
 
 
-class ExpirationMonitor:
+class ExpirationMonitor(ABC):
     """
-    Monitors and updates a secret in HashiCorp Vault for expiration based on custom metadat.
+    Monitors and updates custom metadata in HashiCorp Vault for expiration based on custom metadata.
     """
 
     secret_last_renewal_timestamp_gauge: Gauge
     secret_expiration_timestamp_gauge: Gauge
 
+    last_renewal_gauge_name: str
+    last_renewal_gauge_description: str
+    expiration_gauge_name: str
+    expiration_gauge_description: str
+
     def __init__(self, mount_point: str, secret_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str] = None, metadata_fieldnames: Dict[str, str] = None) -> None:
         """
         Creates an instance of the ExpirationMonitor class.
         """
-        self.mount_point = mount_point
-        self.secret_path = secret_path
-        self.vault_client = vault_client
-        self.service = service
+        self.mount_point:str = mount_point
+        self.secret_path:str = secret_path
+        self.vault_client:str = vault_client
+        self.service:str = service
         # Add the secret specific labels to the provided labels
         self.prometheus_labels = {"secret_path": secret_path, "mount_point": mount_point, "service": service}
 
@@ -51,17 +57,21 @@ class ExpirationMonitor:
         # Only create the metric once
         if not hasattr(cls, "secret_last_renewal_timestamp_gauge"):
             print(prometheus_label_keys)
-            cls.secret_last_renewal_timestamp_gauge = Gauge("vault_secret_last_renewal_timestamp", "Timestamp for when a secret was last updated.", prometheus_label_keys)
+            cls.secret_last_renewal_timestamp_gauge = Gauge(cls.last_renewal_gauge_name, cls.last_renewal_gauge_description, prometheus_label_keys)
         if not hasattr(cls, "secret_expiration_timestamp_gauge"):
-            cls.secret_expiration_timestamp_gauge = Gauge("vault_secret_expiration_timestamp", "Timestamp for when a secret should expire.", prometheus_label_keys)
+            cls.secret_expiration_timestamp_gauge = Gauge(cls.expiration_gauge_name, cls.expiration_gauge_description, prometheus_label_keys)
+
+    @abstractmethod
+    def get_monitored_url(self) -> str:
+        """
+        Abstract method for getting the URL to be monitored
+        """
 
     def update_metrics(self) -> None:
         """
         Update the current value for the metrics.
         """
-        response = requests.get(
-            f"{self.vault_client.url}/v1/{self.mount_point}/metadata/{self.secret_path}", headers={"X-Vault-Namespace": self.vault_client.adapter.namespace, "X-Vault-Token": self.vault_client.token}
-        )
+        response = requests.get(self.get_monitored_url(), headers={"X-Vault-Namespace": self.vault_client.adapter.namespace, "X-Vault-Token": self.vault_client.token})
         response.raise_for_status()
 
         expiration_info = ExpirationMetadata.from_metadata(response.json()["data"]["custom_metadata"], self.last_renewed_timestamp_fieldname, self.expiration_timestamp_fieldname)

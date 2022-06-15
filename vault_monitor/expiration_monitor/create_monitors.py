@@ -3,16 +3,17 @@ Functions for setting up expiration monitors.
 """
 import logging
 from copy import deepcopy
-from typing import List, Dict
+from typing import List, Dict, Sequence
 
 from hvac import Client as hvac_client
 
-from vault_monitor.secret_expiration_monitor.expiration_monitor import ExpirationMonitor
+from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
+from vault_monitor.expiration_monitor.secret_expiration_monitor import SecretExpirationMonitor
 
 LOGGER = logging.getLogger("secret-monitor")
 
 
-def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationMonitor]:
+def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[ExpirationMonitor]:
     """
     Returns a list of secret monitors based on provided configuration.
     """
@@ -38,7 +39,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationM
 
             for secret_path in secret_paths:
                 LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
-                monitor = ExpirationMonitor(
+                monitor = SecretExpirationMonitor(
                     secret.get("mount_point"),
                     secret_path,
                     vault_client,
