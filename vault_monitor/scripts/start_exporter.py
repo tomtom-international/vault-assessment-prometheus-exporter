@@ -43,8 +43,8 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
     monitors: Sequence[Any]
     monitors = []
 
-    secret_expiration_monitoring_config = config.get("secret_expiration_monitoring", {})
-    monitors += expiration.create_monitors(secret_expiration_monitoring_config, vault_client)
+    expiration_monitoring_config = config.get("expiration_monitoring", {})
+    monitors += expiration.create_monitors(expiration_monitoring_config, vault_client)
 
     refresh_interval = config.get("refresh_interval", 30)
     port = config.get("port", 9937)

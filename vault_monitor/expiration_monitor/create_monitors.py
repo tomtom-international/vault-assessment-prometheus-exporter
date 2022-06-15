@@ -9,6 +9,7 @@ from hvac import Client as hvac_client
 
 from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
 from vault_monitor.expiration_monitor.secret_expiration_monitor import SecretExpirationMonitor
+from vault_monitor.expiration_monitor.approle_expiration_monitor import ApproleExpirationMonitor
 
 LOGGER = logging.getLogger("secret-monitor")
 
@@ -19,9 +20,9 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
     """
     default_prometheus_labels = config.get("prometheus_labels", {})
     prometheus_label_keys = list(default_prometheus_labels.keys())
-    default_metadata_filenames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
+    default_metadata_fieldnames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
 
-    secret_monitors = []
+    expiration_monitors = []
     for service_config in config.get("services", {}):
         LOGGER.info("Configuring monitoring for service %s", service_config["name"])
         # Use deepcopy since dicts are handled by ref and tend to get overwritten otherwise
@@ -29,8 +30,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
         service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
         if not check_prometheus_labels(prometheus_label_keys, service_prometheus_labels):
             raise ValueError(f"secret_expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
-
-        for secret in service_config.get("secrets"):
+        for secret in service_config.get("secrets", []):
             secret_paths = []
             if not secret.get("recursive", False):
                 secret_paths.append(secret.get("secret_path"))
@@ -45,11 +45,22 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
                     vault_client,
                     service_config["name"],
                     service_prometheus_labels,
-                    service_config.get("metadata_fieldnames", default_metadata_filenames),
+                    service_config.get("metadata_fieldnames", default_metadata_fieldnames),
                 )
-                secret_monitors.append(monitor)
+                expiration_monitors.append(monitor)
 
-    return secret_monitors
+        for approle in service_config.get("approles", []):
+            monitor = ApproleExpirationMonitor(
+                approle.get("mount_point"),
+                approle.get("entity_id"),
+                vault_client,
+                service_config["name"],
+                service_prometheus_labels,
+                service_config.get("metadata_fieldnames", default_metadata_fieldnames),
+            )
+            expiration_monitors.append(monitor)
+
+    return expiration_monitors
 
 
 def recurse_secrets(mount_point: str, secret_path: str, vault_client: hvac_client) -> List[str]:
@@ -85,7 +96,7 @@ def get_configuration_schema() -> Dict:
     Return the configuration schema for secrets monitoring.
     """
     config_schema = {
-        "secret_expiration_monitoring": {
+        "expiration_monitoring": {
             "meta": {"description": "Configuration for expiration monitor module."},
             "type": "dict",
             "schema": {
@@ -128,7 +139,7 @@ def get_configuration_schema() -> Dict:
                             },
                             "secrets": {
                                 "type": "list",
-                                "required": True,
+                                "required": False,
                                 "nullable": False,
                                 "meta": {"description": "List of secrets to monitor."},
                                 "schema": {
@@ -142,6 +153,24 @@ def get_configuration_schema() -> Dict:
                                         },
                                         "secret_path": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Path to the secret (minus the mount_point)."}},
                                         "recursive": {"type": "boolean", "nullable": False, "meta": {"description": "Recursively monitor all secrets at or below the secret_path."}},
+                                    },
+                                },
+                            },
+                            "approles": {
+                                "type": "list",
+                                "required": False,
+                                "nullable": False,
+                                "meta": {"description": "List of approles to monitor."},
+                                "schema": {
+                                    "type": "dict",
+                                    "schema": {
+                                        "mount_point": {
+                                            "type": "string",
+                                            "required": True,
+                                            "nullable": False,
+                                            "meta": {"description": "Mount point for the AppRole."},
+                                        },
+                                        "entity_id": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Entity ID for the role to monitor."}},
                                     },
                                 },
                             },
