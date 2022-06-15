@@ -7,6 +7,8 @@ from typing import Dict, List, Type, TypeVar
 import hvac
 from prometheus_client import Gauge
 
+from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
+
 ExpirationMonitorType = TypeVar("ExpirationMonitorType", bound="ExpirationMonitor")  # pylint: disable=invalid-name
 
 
@@ -27,10 +29,10 @@ class ExpirationMonitor(ABC):
         """
         Creates an instance of the ExpirationMonitor class.
         """
-        self.mount_point: str = mount_point
-        self.monitored_path: str = monitored_path
-        self.vault_client: str = vault_client
-        self.service: str = service
+        self.mount_point = mount_point
+        self.monitored_path = monitored_path
+        self.vault_client = vault_client
+        self.service = service
         # Add the secret specific labels to the provided labels
         self.prometheus_labels = {"monitored_path": monitored_path, "mount_point": mount_point, "service": service}
 
@@ -59,7 +61,7 @@ class ExpirationMonitor(ABC):
             cls.secret_expiration_timestamp_gauge = Gauge(cls.expiration_gauge_name, cls.expiration_gauge_description, prometheus_label_keys)
 
     @abstractmethod
-    def get_expiration_info(self) -> str:
+    def get_expiration_info(self) -> ExpirationMetadata:
         """
         Abstract method for getting the expiration information
         """

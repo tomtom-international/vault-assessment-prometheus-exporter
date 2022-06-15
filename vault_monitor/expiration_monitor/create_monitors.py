@@ -22,7 +22,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
     prometheus_label_keys = list(default_prometheus_labels.keys())
     default_metadata_fieldnames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
 
-    expiration_monitors = []
+    expiration_monitors: List[ExpirationMonitor] = []
     for service_config in config.get("services", {}):
         LOGGER.info("Configuring monitoring for service %s", service_config["name"])
         # Use deepcopy since dicts are handled by ref and tend to get overwritten otherwise
@@ -39,7 +39,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
 
             for secret_path in secret_paths:
                 LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
-                monitor = SecretExpirationMonitor(
+                secret_monitor = SecretExpirationMonitor(
                     secret.get("mount_point"),
                     secret_path,
                     vault_client,
@@ -47,10 +47,10 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
                     service_prometheus_labels,
                     service_config.get("metadata_fieldnames", default_metadata_fieldnames),
                 )
-                expiration_monitors.append(monitor)
+                expiration_monitors.append(secret_monitor)
 
         for approle in service_config.get("approles", []):
-            monitor = ApproleExpirationMonitor(
+            approle_monitor = ApproleExpirationMonitor(
                 approle.get("mount_point"),
                 approle.get("entity_id"),
                 vault_client,
@@ -58,7 +58,7 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
                 service_prometheus_labels,
                 service_config.get("metadata_fieldnames", default_metadata_fieldnames),
             )
-            expiration_monitors.append(monitor)
+            expiration_monitors.append(approle_monitor)
 
     return expiration_monitors
 

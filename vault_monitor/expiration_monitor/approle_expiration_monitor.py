@@ -29,4 +29,3 @@ class ApproleExpirationMonitor(ExpirationMonitor):
         response.raise_for_status()
 
         return ExpirationMetadata.from_metadata(response.json()["data"]["metadata"], self.last_renewed_timestamp_fieldname, self.expiration_timestamp_fieldname)
-
