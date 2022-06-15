@@ -44,7 +44,6 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationM
                     vault_client,
                     service_config["name"],
                     service_prometheus_labels,
-                    prometheus_label_keys,
                     service_config.get("metadata_fieldnames", default_metadata_filenames),
                 )
                 secret_monitors.append(monitor)
