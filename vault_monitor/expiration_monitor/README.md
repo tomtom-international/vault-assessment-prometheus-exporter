@@ -3,6 +3,28 @@
 This module monitors custom metadata for Vault secrets to allow easy maintenance of secret expiration for non-dynamic secret types (i.e. KeyVault v2 secrets).
 Additionally metadata can be added to Vault entity to track their secrets rotation (e.g. for AppRoles and their secret-ids).
 
+## Vault Policy Requirements
+
+The exporter requires the `read` capability access to the metadata of the monitored secrets.
+Additionally `read` is required on the entities that are being monitored.
+Additionally, if you are using the recursive function to monitor multiple secrets in a path, you will need to provide the `list` capability.
+
+A sample policy for a secret in the KV2 engine `secret` at path `some/example/secret` would need a policy like:
+
+```hcl
+path "secret/metadata/some/example/secret" {
+  capabilities = [ "read" ]
+}
+```
+
+To recursively monitor at the `example` level, it would look like:
+
+```hcl
+path "secret/metadata/some/example/**" {
+  capabilities = [ "read", "list" ]
+}
+```
+
 ## Set Expiration
 
 Expiration and last-renewal information is stored in the custom metadata for each secrets, or in the metadata for each entity.

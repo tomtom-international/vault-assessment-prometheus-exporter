@@ -32,24 +32,7 @@ Additional authentication methods should be relatively easy to add due to usage 
 
 #### Required Policy
 
-The exporter requires the `read` capability access to the metadata of the monitored secrets.
-Additionally, if you are using the recursive function to monitor multiple secrets in a path, you will need to provide the `list` capability.
-
-A sample policy for a secret in the KV2 engine `secret` at path `some/example/secret` would need a policy like:
-
-```hcl
-path "secret/metadata/some/example/secret" {
-  capabilities = [ "read" ]
-}
-```
-
-To recursively monitor at the `example` level, it would look like:
-
-```hcl
-path "secret/metadata/some/example/**" {
-  capabilities = [ "read", "list" ]
-}
-```
+Please see the [module documentation](#modules)
 
 ### Docker Image
 
