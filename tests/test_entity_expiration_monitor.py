@@ -6,6 +6,7 @@ from pytest_mock import mocker
 
 from vault_monitor.expiration_monitor import entity_expiration_monitor, expiration_monitor
 
+
 @pytest.fixture(autouse=True)
 def tear_down():
     """
@@ -23,7 +24,7 @@ def test_basic_creation(mocker):
     mock_vault_client = mocker.Mock()
     mock_gauge = mocker.patch.object(expiration_monitor, "Gauge", autospec=True)
 
-    expected_labels = {"monitored_path": "monitored_path", "mount_point": "mount_point", "service": "service",  "entity_name": "entity_name"}
+    expected_labels = {"monitored_path": "monitored_path", "mount_point": "mount_point", "service": "service", "entity_name": "entity_name"}
     test_object = entity_expiration_monitor.EntityExpirationMonitor(mount_point="mount_point", monitored_path="monitored_path", name="entity_name", vault_client=mock_vault_client, service="service")
 
     assert test_object.prometheus_labels == expected_labels
@@ -69,6 +70,7 @@ def test_custom_values_creation(mocker):
 
     mock_gauge.assert_has_calls(gauge_calls)
 
+
 def test_get_expiraiton_info(mocker):
     mock_vault_client = mocker.Mock()
     mock_gauge = mocker.patch.object(expiration_monitor, "Gauge", autospec=True)
@@ -76,9 +78,9 @@ def test_get_expiraiton_info(mocker):
     test_object = entity_expiration_monitor.EntityExpirationMonitor(mount_point="mount_point", monitored_path="monitored_path", name="entity_name", vault_client=mock_vault_client, service="service")
 
     mock_response = mocker.Mock()
-    mock_response.json.return_value = {"data": {"metadata": {"last_renewal_timestamp": "2022-08-08T09:49:41.415869Z", "expiration_timestamp": "2022-08-08T09:49:41.415869Z"}}} 
+    mock_response.json.return_value = {"data": {"metadata": {"last_renewal_timestamp": "2022-08-08T09:49:41.415869Z", "expiration_timestamp": "2022-08-08T09:49:41.415869Z"}}}
     mock_requests = mocker.patch.object(entity_expiration_monitor, "requests", autospec=True)
-    mock_requests.get.return_value = mock_response   
+    mock_requests.get.return_value = mock_response
 
     test_expiration_metadata = test_object.get_expiration_info()
 
