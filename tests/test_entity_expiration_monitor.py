@@ -1,9 +1,10 @@
+from datetime import datetime
+
 import pytest
 from mock import call
 from pytest_mock import mocker
 
 from vault_monitor.expiration_monitor import entity_expiration_monitor, expiration_monitor
-
 
 @pytest.fixture(autouse=True)
 def tear_down():
@@ -67,3 +68,18 @@ def test_custom_values_creation(mocker):
     ]
 
     mock_gauge.assert_has_calls(gauge_calls)
+
+def test_get_expiraiton_info(mocker):
+    mock_vault_client = mocker.Mock()
+    mock_gauge = mocker.patch.object(expiration_monitor, "Gauge", autospec=True)
+
+    test_object = entity_expiration_monitor.EntityExpirationMonitor(mount_point="mount_point", monitored_path="monitored_path", name="entity_name", vault_client=mock_vault_client, service="service")
+
+    mock_response = mocker.Mock()
+    mock_response.json.return_value = {"data": {"metadata": {"last_renewal_timestamp": "2022-08-08T09:49:41.415869Z", "expiration_timestamp": "2022-08-08T09:49:41.415869Z"}}} 
+    mock_requests = mocker.patch.object(entity_expiration_monitor, "requests", autospec=True)
+    mock_requests.get.return_value = mock_response   
+
+    test_expiration_metadata = test_object.get_expiration_info()
+
+    assert test_expiration_metadata.get_serialized_expiration_metadata() == {"last_renewal_timestamp": "2022-08-08T09:49:41.415869Z", "expiration_timestamp": "2022-08-08T09:49:41.415869Z"}
