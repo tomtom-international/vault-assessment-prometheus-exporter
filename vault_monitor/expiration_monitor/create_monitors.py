@@ -9,7 +9,7 @@ from hvac import Client as hvac_client
 
 from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
 from vault_monitor.expiration_monitor.secret_expiration_monitor import SecretExpirationMonitor
-from vault_monitor.expiration_monitor.approle_expiration_monitor import ApproleExpirationMonitor
+from vault_monitor.expiration_monitor.entity_expiration_monitor import EntityExpirationMonitor
 
 LOGGER = logging.getLogger("secret-monitor")
 
@@ -49,16 +49,17 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
                 )
                 expiration_monitors.append(secret_monitor)
 
-        for approle in service_config.get("approles", []):
-            approle_monitor = ApproleExpirationMonitor(
-                approle.get("mount_point"),
-                approle.get("entity_id"),
+        for entity in service_config.get("entities", []):
+            entity_monitor = EntityExpirationMonitor(
+                entity.get("mount_point"),
+                entity.get("entity_id"),
+                entity.get("entity_name"),
                 vault_client,
                 service_config["name"],
                 service_prometheus_labels,
                 service_config.get("metadata_fieldnames", default_metadata_fieldnames),
             )
-            expiration_monitors.append(approle_monitor)
+            expiration_monitors.append(entity_monitor)
 
     return expiration_monitors
 
@@ -156,11 +157,11 @@ def get_configuration_schema() -> Dict:
                                     },
                                 },
                             },
-                            "approles": {
+                            "entities": {
                                 "type": "list",
                                 "required": False,
                                 "nullable": False,
-                                "meta": {"description": "List of approles to monitor."},
+                                "meta": {"description": "List of entities to monitor."},
                                 "schema": {
                                     "type": "dict",
                                     "schema": {
@@ -168,9 +169,10 @@ def get_configuration_schema() -> Dict:
                                             "type": "string",
                                             "required": True,
                                             "nullable": False,
-                                            "meta": {"description": "Mount point for the AppRole."},
+                                            "meta": {"description": "Mount point for the entities authentication type.."},
                                         },
-                                        "entity_id": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Entity ID for the role to monitor."}},
+                                        "entity_id": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Entity ID for the entity to monitor."}},
+                                        "entity_name": {"type": "string", "required": True, "nullable": False, "meta": {"description": "User friendly name for the entity."}},
                                     },
                                 },
                             },
