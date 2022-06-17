@@ -2,7 +2,7 @@ import pytest
 from mock import call
 from pytest_mock import mocker
 
-from vault_monitor.secret_expiration_monitor import expiration_monitor
+from vault_monitor.expiration_monitor import secret_expiration_monitor, expiration_monitor
 
 
 @pytest.fixture(autouse=True)
@@ -10,8 +10,8 @@ def tear_down():
     # Let test run first
     yield
     #
-    delattr(expiration_monitor.ExpirationMonitor, "secret_expiration_timestamp_gauge")
-    delattr(expiration_monitor.ExpirationMonitor, "secret_last_renewal_timestamp_gauge")
+    delattr(secret_expiration_monitor.SecretExpirationMonitor, "secret_expiration_timestamp_gauge")
+    delattr(secret_expiration_monitor.SecretExpirationMonitor, "secret_last_renewal_timestamp_gauge")
 
 
 def test_basic_creation(mocker):
@@ -21,8 +21,8 @@ def test_basic_creation(mocker):
     mock_vault_client = mocker.Mock()
     mock_gauge = mocker.patch.object(expiration_monitor, "Gauge", autospec=True)
 
-    expected_labels = {"secret_path": "secret_path", "mount_point": "mount_point", "service": "service"}
-    test_object = expiration_monitor.ExpirationMonitor(mount_point="mount_point", secret_path="secret_path", vault_client=mock_vault_client, service="service")
+    expected_labels = {"monitored_path": "monitored_path", "mount_point": "mount_point", "service": "service"}
+    test_object = secret_expiration_monitor.SecretExpirationMonitor(mount_point="mount_point", monitored_path="monitored_path", vault_client=mock_vault_client, service="service")
 
     assert test_object.prometheus_labels == expected_labels
 
@@ -44,10 +44,10 @@ def test_custom_values_creation(mocker):
     mock_vault_client = mocker.Mock()
     mock_gauge = mocker.patch.object(expiration_monitor, "Gauge", autospec=True)
 
-    expected_labels = {"secret_path": "secret_path", "mount_point": "mount_point", "service": "service", "key": "value"}
-    test_object = expiration_monitor.ExpirationMonitor(
+    expected_labels = {"monitored_path": "monitored_path", "mount_point": "mount_point", "service": "service", "key": "value"}
+    test_object = secret_expiration_monitor.SecretExpirationMonitor(
         mount_point="mount_point",
-        secret_path="secret_path",
+        monitored_path="monitored_path",
         vault_client=mock_vault_client,
         service="service",
         prometheus_labels={"key": "value"},

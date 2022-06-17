@@ -3,7 +3,7 @@ import datetime
 import pytest
 from pytest_mock import mocker
 
-from vault_monitor.secret_expiration_monitor.vault_time import ExpirationMetadata
+from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
 
 @pytest.mark.parametrize("weeks, days, hours, minutes, seconds", [(1, 1, 1, 2, 4), (8, 10, 1105, 20, 4444)])
