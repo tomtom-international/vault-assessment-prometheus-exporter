@@ -6,7 +6,7 @@ import logging
 import argparse
 from time import sleep
 from io import FileIO
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Sequence
 
 import yaml
 from prometheus_client import start_http_server
@@ -14,7 +14,7 @@ from cerberus import Validator
 
 from vault_monitor.common.vault_authenticate import get_authenticated_client
 
-import vault_monitor.secret_expiration_monitor.create_monitors as expiration
+import vault_monitor.expiration_monitor.create_monitors as expiration
 
 EXPORTER_MODULES = [expiration]
 
@@ -40,10 +40,11 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
     vault_config = config.get("vault", {})
     vault_client = get_authenticated_client(auth_config=vault_config.get("authentication"), address=vault_config.get("address", None), namespace=vault_config.get("namespace", None))
 
+    monitors: Sequence[Any]
     monitors = []
 
-    secret_expiration_monitoring_config = config.get("secret_expiration_monitoring", {})
-    monitors += expiration.create_monitors(secret_expiration_monitoring_config, vault_client)
+    expiration_monitoring_config = config.get("expiration_monitoring", {})
+    monitors += expiration.create_monitors(expiration_monitoring_config, vault_client)
 
     refresh_interval = config.get("refresh_interval", 30)
     port = config.get("port", 9937)
