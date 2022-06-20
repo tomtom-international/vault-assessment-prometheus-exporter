@@ -3,33 +3,34 @@ Functions for setting up expiration monitors.
 """
 import logging
 from copy import deepcopy
-from typing import List, Dict
+from typing import List, Dict, Sequence
 
 from hvac import Client as hvac_client
 
-from vault_monitor.secret_expiration_monitor.expiration_monitor import ExpirationMonitor
+from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
+from vault_monitor.expiration_monitor.secret_expiration_monitor import SecretExpirationMonitor
+from vault_monitor.expiration_monitor.entity_expiration_monitor import EntityExpirationMonitor
 
 LOGGER = logging.getLogger("secret-monitor")
 
 
-def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationMonitor]:
+def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[ExpirationMonitor]:
     """
     Returns a list of secret monitors based on provided configuration.
     """
     default_prometheus_labels = config.get("prometheus_labels", {})
     prometheus_label_keys = list(default_prometheus_labels.keys())
-    default_metadata_filenames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
+    default_metadata_fieldnames = config.get("metadata_fieldnames", {"last_renewal_timestamp": "last_renewal_timestamp", "expiration_timestamp": "expiration_timestamp"})
 
-    secret_monitors = []
+    expiration_monitors: List[ExpirationMonitor] = []
     for service_config in config.get("services", {}):
         LOGGER.info("Configuring monitoring for service %s", service_config["name"])
         # Use deepcopy since dicts are handled by ref and tend to get overwritten otherwise
         service_prometheus_labels = deepcopy(default_prometheus_labels)
         service_prometheus_labels.update(service_config.get("prometheus_labels", {}))
         if not check_prometheus_labels(prometheus_label_keys, service_prometheus_labels):
-            raise ValueError(f"secret_expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
-
-        for secret in service_config.get("secrets"):
+            raise ValueError(f"expiration_monitoring {service_config['name']} configures prometheus_labels with a key(s) which is not in the globally configured prometheus labels!")
+        for secret in service_config.get("secrets", []):
             secret_paths = []
             if not secret.get("recursive", False):
                 secret_paths.append(secret.get("secret_path"))
@@ -38,18 +39,29 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> List[ExpirationM
 
             for secret_path in secret_paths:
                 LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
-                monitor = ExpirationMonitor(
+                secret_monitor = SecretExpirationMonitor(
                     secret.get("mount_point"),
                     secret_path,
                     vault_client,
                     service_config["name"],
                     service_prometheus_labels,
-                    prometheus_label_keys,
-                    service_config.get("metadata_fieldnames", default_metadata_filenames),
+                    service_config.get("metadata_fieldnames", default_metadata_fieldnames),
                 )
-                secret_monitors.append(monitor)
+                expiration_monitors.append(secret_monitor)
 
-    return secret_monitors
+        for entity in service_config.get("entities", []):
+            entity_monitor = EntityExpirationMonitor(
+                entity.get("mount_point"),
+                entity.get("entity_id"),
+                entity.get("entity_name"),
+                vault_client,
+                service_config["name"],
+                service_prometheus_labels,
+                service_config.get("metadata_fieldnames", default_metadata_fieldnames),
+            )
+            expiration_monitors.append(entity_monitor)
+
+    return expiration_monitors
 
 
 def recurse_secrets(mount_point: str, secret_path: str, vault_client: hvac_client) -> List[str]:
@@ -85,7 +97,7 @@ def get_configuration_schema() -> Dict:
     Return the configuration schema for secrets monitoring.
     """
     config_schema = {
-        "secret_expiration_monitoring": {
+        "expiration_monitoring": {
             "meta": {"description": "Configuration for expiration monitor module."},
             "type": "dict",
             "schema": {
@@ -122,13 +134,13 @@ def get_configuration_schema() -> Dict:
                             "prometheus_labels": {
                                 "type": "dict",
                                 "nullable": True,
-                                "dependencies": "^secret_expiration_monitoring.prometheus_labels",
+                                "dependencies": "^expiration_monitoring.prometheus_labels",
                                 "keysrules": {"type": "string", "forbidden": ["secret_path", "mount_point", "service"]},
                                 "meta": {"description": "Labels to set in the Prometheus metrics. All of the keys must already exist in the global prometheus_labels."},
                             },
                             "secrets": {
                                 "type": "list",
-                                "required": True,
+                                "required": False,
                                 "nullable": False,
                                 "meta": {"description": "List of secrets to monitor."},
                                 "schema": {
@@ -142,6 +154,25 @@ def get_configuration_schema() -> Dict:
                                         },
                                         "secret_path": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Path to the secret (minus the mount_point)."}},
                                         "recursive": {"type": "boolean", "nullable": False, "meta": {"description": "Recursively monitor all secrets at or below the secret_path."}},
+                                    },
+                                },
+                            },
+                            "entities": {
+                                "type": "list",
+                                "required": False,
+                                "nullable": False,
+                                "meta": {"description": "List of entities to monitor."},
+                                "schema": {
+                                    "type": "dict",
+                                    "schema": {
+                                        "mount_point": {
+                                            "type": "string",
+                                            "required": True,
+                                            "nullable": False,
+                                            "meta": {"description": "Mount point for the entities authentication type.."},
+                                        },
+                                        "entity_id": {"type": "string", "required": True, "nullable": False, "meta": {"description": "Entity ID for the entity to monitor."}},
+                                        "entity_name": {"type": "string", "required": True, "nullable": False, "meta": {"description": "User friendly name for the entity."}},
                                     },
                                 },
                             },

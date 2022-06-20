@@ -1,21 +1,28 @@
-# Vault Assesment Prometheus Exporter
+# Vault Assessment Prometheus Exporter
 
-[![PR Checks](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/tomtom-internal/sp-devsup-vault-expiration-monitoring/actions/workflows/pr-checks.yml)
+[![Release](../../actions/workflows/release.yml/badge.svg)](../../sp-devsup-vault-expiration-monitoring/actions/workflows/release.yml)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
-Provides a prometheus exporter for monitoring aspects of a running HashiCorp Vault server.
+Provides a prometheus exporter for monitoring aspects secrets stored on a running HashiCorp Vault server - in contrast to the built-in metrics which focus on the operation of the server itself.
 
-At the moment, the sole focus is on monitoring KV2 static secrets for expiration based on custom metadata, however it has been designed with the intent to allow modular creation of additional monitors, e.g. for monitoring other types of secrets engines or authentication types for rotation needs, or for other at-a-glance metrics.
+At present, the only supported usecase is for monitoring the age and expiration date for a secret stored within a [KV2 secret engine](https://www.vaultproject.io/docs/secrets/kv/kv-v2), as they are static secrets and lack any alerting to assist in manual rotation.
 
-## Deploying Vault Assesment Prometheus Exporter
+Future support may include tracking the age of connection secrets inside dynamic secret engines (e.g. the root password for the [database engine](https://www.vaultproject.io/docs/secrets/databases) or the secret for the primary service principal in the [Azure secret engine](https://www.vaultproject.io/docs/secrets/azure)).
 
-## Vault Configuration
+Additionally, a modular design has been used, to allow for integration of other monitoring targets, for instance a module could be contributed to support tracking all policies using the `sudo` capability.
 
-Before deploying the exporter, you will need to configure access for it into Vault.
+## Deploying Vault Assessment Prometheus Exporter
 
-### Supported Authentication methods
+### Vault Configuration
 
-The exporter supports three authentication methods:
+Configuration on the Vault-side will require configuring authentication access and associating an appropriate Vault policy.
+Please [Supported Authentication Methods](#supported-authentication-methods) for configuring authentication and [Required Policy](#required-policy) for details and instructions and the policy needed to run the exporter.
+
+**Enterprise Users:** If you are running an enterprise server with namespaces, you should run an exporter per namespace, utilizing the exporter with root namespace privileges is discouraged.
+
+#### Supported Authentication Methods
+
+The exporter supports three authentication methods for its connection to HashiCorp Vault:
 
 * [token](https://www.vaultproject.io/docs/internals/token) (intended primarily for development)
 * [approle](https://www.vaultproject.io/docs/auth/approle)
@@ -23,29 +30,13 @@ The exporter supports three authentication methods:
 
 Additional authentication methods should be relatively easy to add due to usage of the [hvac](https://hvac.readthedocs.io/en/stable/overview.html) module, please feel free to open an issue or a pull request with any you might need.
 
-### Policy
+#### Required Policy
 
-The exporter requires the `read` capability access to the metadata of the monitored secrets. Additionally, if you are using the recursive function to monitor multiple secrets in a path, you will need to provide the `list` capability.
-
-A sample policy for a secret in the KV2 engine `secret` at path `some/example/secret` would need a policy like:
-
-```hcl
-path "secret/metadata/some/example/secret" {
-  capabilities = [ "read" ]
-}
-```
-
-To recursively monitor at the `example` level, it would look like:
-
-```hcl
-path "secret/metadata/some/example/**" {
-  capabilities = [ "read", "list" ]
-}
-```
+Please see the [module documentation](#modules)
 
 ### Docker Image
 
-A Docker image can be found on Dockerhub at `tomtomcom/vault-expiration-monitor`.
+A Docker image can be found at [/pkgs/container/vault-assessment-prometheus-exporter](../../pkgs/container/vault-assessment-prometheus-exporter)
 The location of the secret file can be set with the `CONFIG_FILE` environmental variable, any other environment variables that may be required (e.g. for approles) are based on configuration.
 
 ### Direct Installation
@@ -56,25 +47,25 @@ To install and run, do the following:
 1. `poetry install`
 2. `poetry run start_exporter` (optionally use `--config_file` to specify a configuration file, otherwise it will look for the default at `config.yaml`)
 
-## Basic Configuration
+### Basic Configuration
 
 Basic configuration for the exporter configures access to Vault, as well as refresh rate and the port of the exporter.
 The configuration is stored in `config.yaml` (or can be specified in another file with `--config_file`), and is validated for correctness after being loaded.
 
 The schema for the configuration can be shown with `start_exporter --show_schema`.
 
-### General Configuration
+#### General Configuration
 
 * `refresh_interval` - the interval at which the exporter should access Vault to check the expiration metadata for all secrets, by default this is 30 seconds
-* `port` - the port on which the exporter should run, by default this is
+* `port` - the port on which the exporter should run, by default this is 9937.
 
-### Configuring Vault Access
+#### Configuring Vault Access
 
 * `address` - the address for the HashiCorp Vault server, e.g. `https://localhost` when running a dev server
 * `namespace` - the namespace to use for the Vault server, for root namespace or for open source instances, leave blank
 * `authentication` - contains the authentication configuration for accessing Hashicorp Vault, see the "Configuring Authentication" section
 
-#### Configuring Authentication
+##### Configuring Authentication
 
 There are currently three supported authentication methods: `token`, `approle` and `kubernetes`.
 All of these require that an appropriate policy is bound to the resulting `token`, the permissions for which are described in each of the module READMEs.
@@ -109,5 +100,7 @@ Kubernetes configuration allows using the `jwt` token provided by a Kuberenetes 
 * `mount_point` - mount point in Vault for the kubernetes authentication to use, `kubernetes` by default
 
 ## Modules
+
+Please see module documentation for how to configure specific functionality in the Vault Assessment Prometheus Exporter instance.
 
 * [Expiration Monitor](vault_monitor/expiration_monitor/README.md) - monitor secrets in KV2 engines for expiration
