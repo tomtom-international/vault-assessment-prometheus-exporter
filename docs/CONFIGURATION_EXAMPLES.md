@@ -22,6 +22,7 @@ vault:
     token:
 
 expiration_monitoring:
+  services:
     - name: simple_service
       secrets:
       - mount_point: secrets
