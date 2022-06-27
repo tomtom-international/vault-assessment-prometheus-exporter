@@ -9,4 +9,4 @@
 
 ## Reporting a Vulnerability
 
-Please contact all the maintainers listed in [SUPPORT.md](.github/SUPPORT.md) directly.
+Please contact all the maintainers listed in [SUPPORT.md](SUPPORT.md) directly.
