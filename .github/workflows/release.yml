@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  VERSION: 0.5.1
+  VERSION: 1.0.4
 
 jobs:
   release:
