@@ -1,5 +1,5 @@
 
-   Copyright (C) 2022 TomTom N.V. or one of its subsidiaries
+                          Copyright (C) 2022 TomTom NV
 
                                  Apache License
                            Version 2.0, January 2004
