@@ -172,6 +172,7 @@ def get_config_schema(modules: List) -> Dict[str, Dict]:
                         {
                             "kubernetes": {
                                 "type": "dict",
+                                "nullable": True,
                                 "schema": {
                                     "token_file": {"type": "string", "nullable": True},
                                     "mount_point": {"type": "string", "nullable": True},
