@@ -173,8 +173,8 @@ def get_config_schema(modules: List) -> Dict[str, Dict]:
                             "kubernetes": {
                                 "type": "dict",
                                 "schema": {
-                                    "token_file": {"type": "string"},
-                                    "mount_point": {"type": "string"},
+                                    "token_file": {"type": "string", "nullable": True},
+                                    "mount_point": {"type": "string", "nullable": True},
                                 },
                                 "meta": {"description": "Configuration for Kubernetes authentication method.", "link": "https://www.vaultproject.io/docs/auth/kubernetes"},
                             }
