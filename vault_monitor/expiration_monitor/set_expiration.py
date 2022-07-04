@@ -140,7 +140,7 @@ def main() -> None:
         for secret in secrets:
             set_expiration(
                 args.mount_point,
-                secret[1:], # Drop the '/' at the beginning of the result
+                secret[1:],  # Drop the '/' at the beginning of the result
                 args.weeks,
                 args.days,
                 args.hours,
