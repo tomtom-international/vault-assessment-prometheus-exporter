@@ -10,6 +10,7 @@ import requests
 
 from vault_monitor.common.vault_authenticate import get_vault_client_for_user
 from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
+from vault_monitor.expiration_monitor.create_monitors import recurse_secrets
 
 LOGGER = logging.getLogger("set_expiration")
 
@@ -25,6 +26,8 @@ def handle_args() -> argparse.Namespace:
 
     parser.add_argument("mount_point", type=str, help="Mount point of kv2 engine, e.g. secret")
     parser.add_argument("secret_path", type=str, help="Path to secret, e.g. some/secret")
+
+    parser.add_argument("--recursive", action="store_true", help="Recursively set expiration")
 
     parser.add_argument(
         "-l",
@@ -129,22 +132,42 @@ def main() -> None:
     vault_client = get_vault_client_for_user(url=args.address, namespace=args.namespace)
 
     # configure logging level
-    logging.basicConfig(level=args.logging)  # take away
+    logging.basicConfig(level=args.logging)
 
-    set_expiration(
-        args.mount_point,
-        args.secret_path,
-        args.weeks,
-        args.days,
-        args.hours,
-        args.minutes,
-        args.seconds,
-        vault_client.url,
-        vault_client.adapter.namespace,
-        vault_client.token,
-        args.last_renewed_timestamp_fieldname,
-        args.expiration_timestamp_fieldname,
-    )
+    if args.recursive:
+        secrets = recurse_secrets(args.mount_point, args.secret_path, vault_client)
+
+        for secret in secrets:
+            set_expiration(
+                args.mount_point,
+                secret[1:], # Drop the '/' at the beginning of the result
+                args.weeks,
+                args.days,
+                args.hours,
+                args.minutes,
+                args.seconds,
+                vault_client.url,
+                vault_client.adapter.namespace,
+                vault_client.token,
+                args.last_renewed_timestamp_fieldname,
+                args.expiration_timestamp_fieldname,
+            )
+
+    else:
+        set_expiration(
+            args.mount_point,
+            args.secret_path,
+            args.weeks,
+            args.days,
+            args.hours,
+            args.minutes,
+            args.seconds,
+            vault_client.url,
+            vault_client.adapter.namespace,
+            vault_client.token,
+            args.last_renewed_timestamp_fieldname,
+            args.expiration_timestamp_fieldname,
+        )
 
 
 if __name__ == "__main__":
