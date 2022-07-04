@@ -34,6 +34,8 @@ Both timestamps are in UTC time in the [ISO 8601 format](https://www.w3.org/TR/N
 The precision used goes to miliseconds, for example `2022-05-02T09:49:41.415869Z`
 The exporter does not support other timezones, and will currently break if the are used.
 
+The script can also recursively set metadata from a given secret path point.
+
 ## Field Info
 
 * `last_renewal_timestamp` - this should be set when the secret is created or renewed, it indicates the age of the current version of the secret. This allows tracking the age of the secret, in addition to seeing when it is marked to expire.
