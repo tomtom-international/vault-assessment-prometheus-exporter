@@ -56,8 +56,6 @@ def handle_args() -> argparse.Namespace:
 
 
 def set_expiration(
-    address: str,
-    namespace: str,
     mount_point: str,
     secret_path: str,
     weeks: int,
@@ -65,26 +63,24 @@ def set_expiration(
     hours: int,
     minutes: int,
     seconds: int,
+    vault_client_url: str,
+    vault_client_namespace: str,
+    vault_client_token: str,
     last_renewed_timestamp_fieldname: str = "last_renewal_timestamp",
     expiration_timestamp_fieldname: str = "expiration_timestamp",
-    log_level: str = "INFO",
 ) -> None:
     """
     Sets expiration metadadate for specified secret.
     """
-    # Get the hvac client, we will have to use requests some with the token it manages
-    vault_client = get_vault_client_for_user(url=address, namespace=namespace)
 
     expiration_info = ExpirationMetadata.from_duration(weeks, days, hours, minutes, seconds, last_renewed_timestamp_fieldname, expiration_timestamp_fieldname)
-
-    logging.basicConfig(level=log_level)
 
     LOGGER.info("Updating expiration data for secret.")
 
     # Custom metadata isn't fully supported by hvac at the moment, use requests
     response = requests.patch(
-        f"{vault_client.url}/v1/{mount_point}/metadata/{secret_path}",
-        headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
+        f"{vault_client_url}/v1/{mount_point}/metadata/{secret_path}",
+        headers={"X-Vault-Namespace": vault_client_namespace, "X-Vault-Token": vault_client_token, "Content-Type": "application/merge-patch+json"},
         json={"custom_metadata": expiration_info.get_serialized_expiration_metadata()},
     )
 
@@ -94,8 +90,8 @@ def set_expiration(
             DeprecationWarning,
         )
         response = requests.get(
-            f"{vault_client.url}/v1/{mount_point}/metadata/{secret_path}",
-            headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token, "Content-Type": "application/merge-patch+json"},
+            f"{vault_client_url}/v1/{mount_point}/metadata/{secret_path}",
+            headers={"X-Vault-Namespace": vault_client_namespace, "X-Vault-Token": vault_client_token, "Content-Type": "application/merge-patch+json"},
         )
         response.raise_for_status()
 
@@ -115,8 +111,8 @@ def set_expiration(
         del metadata["versions"]
 
         response = requests.put(
-            f"{vault_client.url}/v1/{mount_point}/metadata/{secret_path}",
-            headers={"X-Vault-Namespace": vault_client.adapter.namespace, "X-Vault-Token": vault_client.token},
+            f"{vault_client_url}/v1/{mount_point}/metadata/{secret_path}",
+            headers={"X-Vault-Namespace": vault_client_namespace, "X-Vault-Token": vault_client_token},
             json=metadata,
         )
 
@@ -128,9 +124,14 @@ def main() -> None:
     Gets the arguments and passes them to set_expiration function.
     """
     args = handle_args()
+
+    # Get the hvac client, we will have to use requests some with the token it manages
+    vault_client = get_vault_client_for_user(url=args.address, namespace=args.namespace)
+
+    # configure logging level
+    logging.basicConfig(level=args.logging)  # take away
+
     set_expiration(
-        args.address,
-        args.namespace,
         args.mount_point,
         args.secret_path,
         args.weeks,
@@ -138,9 +139,11 @@ def main() -> None:
         args.hours,
         args.minutes,
         args.seconds,
+        vault_client.url,
+        vault_client.adapter.namespace,
+        vault_client.token,
         args.last_renewed_timestamp_fieldname,
         args.expiration_timestamp_fieldname,
-        args.logging,
     )
 
 
