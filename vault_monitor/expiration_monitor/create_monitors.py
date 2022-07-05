@@ -35,10 +35,13 @@ def create_monitors(config: Dict, vault_client: hvac_client) -> Sequence[Expirat
             if not secret.get("recursive", False):
                 secret_paths.append(secret.get("secret_path"))
             else:
-                secret_paths = recurse_secrets(mount_point=secret.get("mount_point"), secret_path=secret.get("secret_path"), vault_client=vault_client)
+                secret_path = secret.get("secret_path")
+                # Remove any forward slashes at the beginning of the secret path
+                secret_path = secret_path[1:] if secret_path and secret_path[0] == "/" else secret_path
+                secret_paths = recurse_secrets(mount_point=secret.get("mount_point"), secret_path=secret_path, vault_client=vault_client)
 
             for secret_path in secret_paths:
-                LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret.get("secret_path"))
+                LOGGER.debug("Monitoring %s/%s", secret.get("mount_point"), secret_path)
                 secret_monitor = SecretExpirationMonitor(
                     secret.get("mount_point"),
                     secret_path,
@@ -75,7 +78,8 @@ def recurse_secrets(mount_point: str, secret_path: str, vault_client: hvac_clien
     for key in keys:
         # Check if the key is a "directory"
         if key[-1] == "/":
-            secrets += recurse_secrets(mount_point=mount_point, secret_path=f"{secret_path}/{key[:-1]}", vault_client=vault_client)
+            subpath = f"{secret_path}/{key[:-1]}" if secret_path else key[:-1]
+            secrets += recurse_secrets(mount_point=mount_point, secret_path=subpath, vault_client=vault_client)
         else:
             secrets.append(f"{secret_path}/{key}")
 
