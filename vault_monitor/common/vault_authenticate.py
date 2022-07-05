@@ -121,7 +121,7 @@ def get_client_with_kubernetes_auth(config: Dict[str, str], address: str, namesp
     with open(jwt_file_path, "r", encoding="UTF8") as jwt_file:
         jwt = jwt_file.read()
     client = hvac.Client(url=address, namespace=namespace)
-    client.kubernetes.login(role, jwt, mount_point=mount_point)
+    client.auth.kubernetes.login(role, jwt, mount_point=mount_point)
     return client
 
 
