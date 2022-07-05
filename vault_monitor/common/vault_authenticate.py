@@ -55,6 +55,8 @@ def get_authenticated_client(auth_config: Dict[str, Dict[str, str]], address: st
         return get_client_with_kubernetes_auth(kubernetes_auth_config, address, namespace)
 
     # As a last ditch effort check for tokens, this includes checking for sensible defaults in case of limited configuration
+    if token_auth_config is None:
+        token_auth_config = {}
     return get_client_with_token_auth(token_auth_config, address, namespace)
 
 

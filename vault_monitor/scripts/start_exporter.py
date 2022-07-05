@@ -162,6 +162,7 @@ def get_config_schema(modules: List) -> Dict[str, Dict]:
                         {
                             "token": {
                                 "type": "dict",
+                                "nullable": True,
                                 "schema": {
                                     "token_var_name": {"type": "string", "nullable": True},
                                     "token_file": {"type": "string", "nullable": True},
