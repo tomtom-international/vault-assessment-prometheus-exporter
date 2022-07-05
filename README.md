@@ -65,6 +65,12 @@ The schema for the configuration can be shown with `start_exporter --show_schema
 * `namespace` - the namespace to use for the Vault server, for root namespace or for open source instances, leave blank
 * `authentication` - contains the authentication configuration for accessing Hashicorp Vault, see the "Configuring Authentication" section
 
+#### Using a Custom CA
+
+For using a custom CA (or otherwise setting the trusted certificate authorities) please use the environmental variable `REQUESTS_CA_BUNDLE`.
+
+See the [requests documentation](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification) for more details.
+
 ##### Configuring Authentication
 
 There are currently three supported authentication methods: `token`, `approle` and `kubernetes`.
