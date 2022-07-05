@@ -104,6 +104,7 @@ Kubernetes configuration allows using the `jwt` token provided by a Kuberenetes 
 
 * `token_file` - path to the token file, defaults to /var/run/secrets/kubernetes.io/serviceaccount/token
 * `mount_point` - mount point in Vault for the kubernetes authentication to use, `kubernetes` by default
+* `role` - the role in the kubernetes authentication method to use, `vape` by default
 
 ## Modules
 
