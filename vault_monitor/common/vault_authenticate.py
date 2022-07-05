@@ -48,10 +48,10 @@ def get_authenticated_client(auth_config: Dict[str, Dict[str, str]], address: st
     kubernetes_auth_config = auth_config.get("kubernetes", None)
     token_auth_config = auth_config.get("token", {})
 
-    if approle_auth_config:
+    if approle_auth_config is not None:
         return get_client_with_approle_auth(approle_auth_config, address, namespace)
 
-    if kubernetes_auth_config:
+    if kubernetes_auth_config is not None:
         return get_client_with_kubernetes_auth(kubernetes_auth_config, address, namespace)
 
     # As a last ditch effort check for tokens, this includes checking for sensible defaults in case of limited configuration
