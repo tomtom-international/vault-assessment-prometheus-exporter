@@ -76,6 +76,8 @@ See the [requests documentation](https://requests.readthedocs.io/en/latest/user/
 There are currently three supported authentication methods: `token`, `approle` and `kubernetes`.
 All of these require that an appropriate policy is bound to the resulting `token`, the permissions for which are described in each of the module READMEs.
 
+If you wish to use the defaults for any authentication type, you can simply use `{}` after specifying it, e.g. `kubernetes: {}`.
+
 ##### Token Authentication
 
 Token authentication is not generally recommended for production deployments, but rather for testing and development.
