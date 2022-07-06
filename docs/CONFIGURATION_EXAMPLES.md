@@ -8,18 +8,18 @@ At a bare minimum, Vault must be configured with an address and some authenticat
 vault:
   address: https://vault.exampledomainname.com
   authentication:
-    token:
+    token: {}
 ```
 
 ## Complete Simple Configuration using Token Authentication for Expiration Monitoring
 
-An example of the absolute bare minimum configuration to monitor a single secret.
+An example of the absolute bare minimum configuration to monitor a single secret using the kubernetes authentication option with defaults.
 
 ```yaml
 vault:
   address: https://vault.exampledomainname.com
   authentication:
-    token:
+    kubernetes: {}
 
 expiration_monitoring:
   services:
