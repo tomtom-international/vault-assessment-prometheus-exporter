@@ -173,7 +173,7 @@ def test_get_client_with_kubernetes_auth(mocker):
     vault_monitor.common.vault_authenticate.get_client_with_kubernetes_auth(config=test_config, address=test_address, namespace=test_namespace)
 
     mock_get_client.assert_called_once_with(url=test_address, namespace=test_namespace)
-    mock_client.auth_kubernetes.assert_called_once_with("kubernetes", "test_kubernetes_token")
+    mock_client.auth.kubernetes.login.assert_called_once_with("vape", "test_kubernetes_token", mount_point="kubernetes")
 
 
 @mock.patch.dict(os.environ, {"VAULT_TOKEN": "test_token"})
