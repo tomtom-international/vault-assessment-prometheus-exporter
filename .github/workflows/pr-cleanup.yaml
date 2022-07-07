@@ -11,7 +11,7 @@ jobs:
     name: docker cleanup
     runs-on: ubuntu-latest
     permissions:
-      packages: delete 
+      packages: write 
 
     steps:
     - name: Get PR ID
