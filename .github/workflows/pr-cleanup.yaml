@@ -10,6 +10,8 @@ jobs:
   docker:
     name: docker cleanup
     runs-on: ubuntu-latest
+    permissions:
+      packages: delete 
 
     steps:
     - name: Get PR ID
@@ -20,5 +22,7 @@ jobs:
       id: container
       run: |
         export pr_id=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index("pr-${{ steps.pr.outputs.id }}")).id')
+
         echo "${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions/$pr_id"
+
         curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions/$pr_id
