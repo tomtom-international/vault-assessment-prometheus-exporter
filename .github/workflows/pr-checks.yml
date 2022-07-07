@@ -69,7 +69,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ github.repository }}:${{ steps.pr.outputs.id }}
+        tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
 
   security:
