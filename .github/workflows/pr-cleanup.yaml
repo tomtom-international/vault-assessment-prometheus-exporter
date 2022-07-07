@@ -1,0 +1,23 @@
+name: PR Cleanup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: docker cleanup
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get PR ID
+      id: pr
+      run: echo "::set-output name=id::$(echo ${{ github.ref_name }} | cut -d"/" -f1)"
+
+    - name: Get package id
+      id: container
+      run: echo "::set-output=id ::$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index("pr-${{ steps.pr.outputs.id }}")).id')
+
+    - name: Delete PR package
+      run: curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions/${{ steps.container.outputs.id }}
+
+
