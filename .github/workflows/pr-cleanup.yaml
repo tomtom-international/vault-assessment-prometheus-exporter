@@ -2,9 +2,12 @@ name: PR Cleanup
 
 on:
   workflow_dispatch:
+  pull_request:
+    types:
+    - closed
 
 jobs:
-  python:
+  docker:
     name: docker cleanup
     runs-on: ubuntu-latest
 
@@ -15,9 +18,11 @@ jobs:
 
     - name: Get package id
       id: container
-      run: echo "::set-output=id ::$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index("pr-${{ steps.pr.outputs.id }}")).id')
+      run: |
+        echo "::set-output=id ::$(curl -H \"Accept: application/vnd.github+json\" -H \"Authorization: token ${{ secrets.GITHUB_TOKEN }}\" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index(\"pr-${{ steps.pr.outputs.id }}\")).id')"
 
     - name: Delete PR package
-      run: curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions/${{ steps.container.outputs.id }}
+      run: |
+        curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions/${{ steps.container.outputs.id }}
 
 
