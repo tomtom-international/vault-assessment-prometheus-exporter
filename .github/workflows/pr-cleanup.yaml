@@ -19,10 +19,10 @@ jobs:
     - name: Get package id
       id: container
       run: |
-        echo "::set-output=id ::$(curl -H \"Accept: application/vnd.github+json\" -H \"Authorization: token ${{ secrets.GITHUB_TOKEN }}\" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index(\"pr-${{ steps.pr.outputs.id }}\")).id')"
+        echo ::set-output=id::$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index("pr-${{ steps.pr.outputs.id }}")).id')
 
     - name: Delete PR package
       run: |
-        curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/packages/container/vault-assessment-prometheus-exporter/versions/${{ steps.container.outputs.id }}
+        curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions/${{ steps.container.outputs.id }}
 
 
