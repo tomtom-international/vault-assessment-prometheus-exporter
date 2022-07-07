@@ -28,6 +28,6 @@ jobs:
         curl --request POST \
           --url https://api.github.com/graphql \
           --header "Accept: application/vnd.github.package-deletes-preview+json" \
-          --header "Authorization: Bearer ${GITHUB_TOKEN}" \
+          --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           --data "$(cat json)" \
           -s
