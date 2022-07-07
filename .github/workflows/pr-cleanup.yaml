@@ -23,6 +23,11 @@ jobs:
       run: |
         export pr_id=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index("pr-${{ steps.pr.outputs.id }}")).id')
 
-        echo "${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions/$pr_id"
+        echo -e "{\"query\": \"mutation { deletePackageVersion(input:{packageVersionId:\\\"$pr_id\\\"}) { success }}\"}" > json
 
-        curl  -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions/$pr_id
+        curl --request POST \
+          --url https://api.github.com/graphql \
+          --header "Accept: application/vnd.github.package-deletes-preview+json" \
+          --header "Authorization: Bearer ${GITHUB_TOKEN}" \
+          --data "$(cat json)" \
+          -s
