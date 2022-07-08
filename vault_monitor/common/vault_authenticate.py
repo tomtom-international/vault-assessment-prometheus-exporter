@@ -48,13 +48,15 @@ def get_authenticated_client(auth_config: Dict[str, Dict[str, str]], address: st
     kubernetes_auth_config = auth_config.get("kubernetes", None)
     token_auth_config = auth_config.get("token", {})
 
-    if approle_auth_config:
+    if approle_auth_config is not None:
         return get_client_with_approle_auth(approle_auth_config, address, namespace)
 
-    if kubernetes_auth_config:
+    if kubernetes_auth_config is not None:
         return get_client_with_kubernetes_auth(kubernetes_auth_config, address, namespace)
 
     # As a last ditch effort check for tokens, this includes checking for sensible defaults in case of limited configuration
+    if token_auth_config is None:
+        token_auth_config = {}
     return get_client_with_token_auth(token_auth_config, address, namespace)
 
 
@@ -114,11 +116,12 @@ def get_client_with_kubernetes_auth(config: Dict[str, str], address: str, namesp
     Returns an authenticated Vault client with Kuberenetes authentication.
     """
     mount_point = config.get("mount_point", "kubernetes")
+    role = config.get("role", "vape")
     jwt_file_path = config.get("token_file", "/var/run/secrets/kubernetes.io/serviceaccount/token")
     with open(jwt_file_path, "r", encoding="UTF8") as jwt_file:
         jwt = jwt_file.read()
     client = hvac.Client(url=address, namespace=namespace)
-    client.auth_kubernetes(mount_point, jwt)
+    client.auth.kubernetes.login(role, jwt, mount_point=mount_point)
     return client
 
 
