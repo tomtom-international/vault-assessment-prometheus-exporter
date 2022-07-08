@@ -55,7 +55,6 @@ class ExpirationMonitor(ABC):
         """
         # Only create the metric once
         if not hasattr(cls, "secret_last_renewal_timestamp_gauge"):
-            print(prometheus_label_keys)
             cls.secret_last_renewal_timestamp_gauge = Gauge(cls.last_renewal_gauge_name, cls.last_renewal_gauge_description, prometheus_label_keys)
         if not hasattr(cls, "secret_expiration_timestamp_gauge"):
             cls.secret_expiration_timestamp_gauge = Gauge(cls.expiration_gauge_name, cls.expiration_gauge_description, prometheus_label_keys)

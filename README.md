@@ -65,10 +65,18 @@ The schema for the configuration can be shown with `start_exporter --show_schema
 * `namespace` - the namespace to use for the Vault server, for root namespace or for open source instances, leave blank
 * `authentication` - contains the authentication configuration for accessing Hashicorp Vault, see the "Configuring Authentication" section
 
+#### Using a Custom CA
+
+For using a custom CA (or otherwise setting the trusted certificate authorities) please use the environmental variable `REQUESTS_CA_BUNDLE`.
+
+See the [requests documentation](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification) for more details.
+
 ##### Configuring Authentication
 
 There are currently three supported authentication methods: `token`, `approle` and `kubernetes`.
 All of these require that an appropriate policy is bound to the resulting `token`, the permissions for which are described in each of the module READMEs.
+
+If you wish to use the defaults for any authentication type, you can simply use `{}` after specifying it, e.g. `kubernetes: {}`.
 
 ##### Token Authentication
 
@@ -98,6 +106,7 @@ Kubernetes configuration allows using the `jwt` token provided by a Kuberenetes 
 
 * `token_file` - path to the token file, defaults to /var/run/secrets/kubernetes.io/serviceaccount/token
 * `mount_point` - mount point in Vault for the kubernetes authentication to use, `kubernetes` by default
+* `role` - the role in the kubernetes authentication method to use, `vape` by default
 
 ## Modules
 
