@@ -1,33 +1,16 @@
-name: PR Cleanup
+name: 'Clean up Docker images from PR'
 
 on:
-  workflow_dispatch:
   pull_request:
-    types:
-    - closed
+    types: [closed]
 
 jobs:
-  docker:
-    name: docker cleanup
+  purge-image:
+    name: Delete image from ghcr.io
     runs-on: ubuntu-latest
-    permissions:
-      packages: write 
-
     steps:
-    - name: Get PR ID
-      id: pr
-      run: echo "::set-output name=id::$(echo ${{ github.ref_name }} | cut -d"/" -f1)"
-
-    - name: Get package id
-      id: container
-      run: |
-        export pr_id=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" ${{ github.api_url }}/user/packages/container/vault-assessment-prometheus-exporter/versions | jq -c '.[] | select(.metadata.container.tags | index("pr-${{ steps.pr.outputs.id }}")).id')
-
-        echo -e "{\"query\": \"mutation { deletePackageVersion(input:{packageVersionId:\\\"$pr_id\\\"}) { success }}\"}" > json
-
-        curl --request POST \
-          --url https://api.github.com/graphql \
-          --header "Accept: application/vnd.github.package-deletes-preview+json" \
-          --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          --data "$(cat json)" \
-          -s
+      - uses: chipkent/action-cleanup-package@v1.0.1
+        with:
+          package-name: ${{ github.event.repository.name }}
+          tag: pr-${{ github.event.pull_request.number }}
+          github-token: ${{ secrets.PACKAGE_DELETION }}
