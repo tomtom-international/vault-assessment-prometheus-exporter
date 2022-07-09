@@ -49,11 +49,11 @@ jobs:
   
     - name: Get Target Repo
       id: target
-      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq --raw .pull_request.base.label | cut -d':' -f1)"
+      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq --raw-output .pull_request.base.label | cut -d':' -f1)"
 
     - name: Get Incoming Repo
       id: incoming
-      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq --raw .pull_request.head.label | cut -d':' -f1)"
+      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq --raw-output .pull_request.head.label | cut -d':' -f1)"
 
     - name: Get PR ID
       id: pr
