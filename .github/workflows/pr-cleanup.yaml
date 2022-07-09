@@ -12,10 +12,24 @@ jobs:
     name: Delete image from ghcr.io
     runs-on: ubuntu-latest
     steps:
-      - uses: eugene-davis/action-cleanup-package@add-org-support
-        with:
-          package-name: ${{ github.event.repository.name }}
-          tag: pr-${{ github.event.pull_request.number }}
-          github-token: ${{ secrets.PACKAGE_DELETION }}
-          github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
-        if: ${{ env.BUILD_PR && steps.target.outputs.name == steps.incoming.outputs.name }}
+    - name: Build PR Check
+      id: containers
+      run: |
+       if [[ "${{ secrets.BUILD_PR }}" != "" && \
+             "${{ secrets.BUILD_PR }}" != "" && \
+             "${{ secrets.PR_CONTAINERS }}" != "" ]]
+       then
+         echo "PR Builds configured"
+         echo "::set-output name=BUILD_PR::true"
+       else
+         echo "PR Builds not configured"
+         echo "::set-output name=BUILD_PR::false"
+       fi
+       
+    - uses: eugene-davis/action-cleanup-package@add-org-support
+      with:
+        package-name: ${{ github.event.repository.name }}
+        tag: pr-${{ github.event.pull_request.number }}
+        github-token: ${{ secrets.PACKAGE_DELETION }}
+        github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
+      if: ${{ steps.containers.outputs.BUILD_PR }}
