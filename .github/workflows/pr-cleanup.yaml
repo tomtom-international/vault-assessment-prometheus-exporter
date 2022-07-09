@@ -7,7 +7,7 @@ on:
 jobs:
   purge-image:
     name: Delete image from ghcr.io
-    if: ${{ secrets.GITHUB_TOKEN }}
+    if: "${{ secrets.GITHUB_TOKEN }}"
     runs-on: ubuntu-latest
     steps:
       - uses: eugene-davis/action-cleanup-package@add-org-support
