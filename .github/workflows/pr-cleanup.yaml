@@ -11,6 +11,7 @@ jobs:
   purge-image:
     name: Delete image from ghcr.io
     runs-on: ubuntu-latest
+    if: ${{ secret.PACKAGE_DELETION }}
     steps:
       - uses: eugene-davis/action-cleanup-package@add-org-support
         with:
@@ -18,4 +19,3 @@ jobs:
           tag: pr-${{ github.event.pull_request.number }}
           github-token: ${{ secrets.PACKAGE_DELETION }}
           github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
-        if: ${{ env.PACKAGE_DELETION }}
