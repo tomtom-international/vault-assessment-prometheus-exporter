@@ -6,7 +6,6 @@ on:
 
 env:
   REQUIRED_COVERAGE: 30
-  BUILD_PR: ${{ secrets.BULD_PR }}
 
 
 jobs:
@@ -46,19 +45,25 @@ jobs:
     - uses: hadolint/hadolint-action@v2.0.0
       with:
         dockerfile: Dockerfile
-  
-    - name: Get Target Repo
-      id: target
-      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq --raw-output .pull_request.base.label | cut -d':' -f1)"
-
-    - name: Get Incoming Repo
-      id: incoming
-      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq --raw-output .pull_request.head.label | cut -d':' -f1)"
+        
+    - name: Build PR Check
+      id: containers
+      run: |
+       if [[ "${{ secrets.BUILD_PR }}" != "" && \
+             "${{ secrets.BUILD_PR }}" != "" && \
+             "${{ secrets.PR_CONTAINERS }}" != "" && \
+       then
+         echo "PR Builds configured"
+         echo "::set-output name=BUILD_PUR::true"
+       else
+         echo "PR Builds not configured"
+         echo "::set-output name=BUILD_PUR::false"
+       fi
 
     - name: Get PR ID
       id: pr
       run: echo "::set-output name=id::$(echo ${{ github.ref_name }} | cut -d"/" -f1)"
-      if: ${{ env.BUILD_PR && steps.target.outputs.name == steps.incoming.outputs.name }}
+      if: ${{ steps.containers.outputs.BUILD_PR }}
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
@@ -70,9 +75,9 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.repository_owner }}
+        username: ${{ secrets.PR_CONTAINERS_USER }}
         password: ${{ secrets.PR_CONTAINERS }}
-      if: ${{ env.BUILD_PR && steps.target.outputs.name == steps.incoming.outputs.name }}
+      if: ${{ steps.containers.outputs.BUILD_PR }}
 
     - name: PR Cross Platform Build and Push
       uses: docker/build-push-action@v2
@@ -81,7 +86,7 @@ jobs:
         push: true
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-      if: ${{ env.BUILD_PR && steps.target.outputs.name == steps.incoming.outputs.name }}
+      if: ${{ steps.containers.outputs.BUILD_PR }}
 
     - name: PR Cross Platform Build
       uses: docker/build-push-action@v2
@@ -89,7 +94,7 @@ jobs:
         context: .
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-      if: "${{ !env.BUILD_PR || steps.target.outputs.name != steps.incoming.outputs.name }}"
+      if: ${{ !steps.containers.outputs.BUILD_PR }}
 
   security:
     name: security checks
