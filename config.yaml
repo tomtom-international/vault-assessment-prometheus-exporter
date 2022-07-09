@@ -1,0 +1,13 @@
+vault:
+  address: https://vault.techpropaganda.com
+  #ca_cert: ./techpropaganda-com.pem
+  authentication:
+    token:
+
+expiration_monitoring:
+  services:
+  - name: backup
+    secrets:
+    - mount_point: backup
+      secret_path: ""
+      recursive: True
