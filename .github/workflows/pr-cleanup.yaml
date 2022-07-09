@@ -4,10 +4,12 @@ on:
   pull_request:
     types: [closed]
 
+env:
+  PACKAGE_DELETION: ${{ secrets.PACKAGE_DELETION }}
+
 jobs:
   purge-image:
     name: Delete image from ghcr.io
-    if: "${{ secrets.GITHUB_TOKEN }}"
     runs-on: ubuntu-latest
     steps:
       - uses: eugene-davis/action-cleanup-package@add-org-support
@@ -16,3 +18,4 @@ jobs:
           tag: pr-${{ github.event.pull_request.number }}
           github-token: ${{ secrets.PACKAGE_DELETION }}
           org: ${{ secrets.ORG}} # Should only be set when running in an organization
+        if: ${{ env.PACKAGE_DELETION }}
