@@ -49,8 +49,7 @@ jobs:
     - name: Sets env vars for pr-builds if token is present
       run: |
         echo "PUSH_PR_BUILD=${{ false }}" >> $GITHUB_ENV
-      if: ${{ secrets.GITHUB_TOKEN }}
-
+      if: "${{ secrets.GITHUB_TOKEN }}"
 
     - name: Get PR ID
       id: pr
@@ -74,7 +73,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        push: if: ${{ env.PUSH_PR_BUILD }}
+        push: ${{ env.PUSH_PR_BUILD }}
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
 
