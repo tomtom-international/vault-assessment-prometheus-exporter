@@ -46,6 +46,12 @@ jobs:
       with:
         dockerfile: Dockerfile
 
+    - name: Sets env vars for pr-builds if token is present
+      run: |
+        echo "PUSH_PR_BUILD=${{ false }}" >> $GITHUB_ENV
+      if: ${{ secrets.GITHUB_TOKEN }}
+
+
     - name: Get PR ID
       id: pr
       run: echo "::set-output name=id::$(echo ${{ github.ref_name }} | cut -d"/" -f1)"
@@ -62,12 +68,13 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ env.PUSH_PR_BUILD }}
 
     - name: PR Cross Platform Build
       uses: docker/build-push-action@v2
       with:
         context: .
-        push: true
+        push: if: ${{ env.PUSH_PR_BUILD }}
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
 
