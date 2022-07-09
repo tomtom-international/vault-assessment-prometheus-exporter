@@ -46,17 +46,19 @@ jobs:
     - uses: hadolint/hadolint-action@v2.0.0
       with:
         dockerfile: Dockerfile
+
+    - name: Get Target Repo
+      id: target
+      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq .pull_request.base.label | cut -d':' -f1)"
+    
+    - name: Get Incoming Repo
+      id: incoming
+      run: echo "::set-output name=name::$(cat ${{ github.EVENT_PATH }} | jq .pull_request.head.label | cut -d':' -f1)"
   
     - name: Get PR ID
       id: pr
       run: echo "::set-output name=id::$(echo ${{ github.ref_name }} | cut -d"/" -f1)"
-      if: ${{ env.PACKAGE_DELETION }}
-    
-    - name: Show base
-      run: |
-        cat ${{ github.EVENT_PATH }} | jq .pull_request.base.label
-        cat ${{ github.EVENT_PATH }} | jq .pull_request.head.label
-
+      if: ${{ env.PACKAGE_DELETION && steps.target.outputs.name == steps.incoming.outputs.name }}
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
@@ -70,7 +72,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      if: ${{ env.PACKAGE_DELETION }}
+      if: ${{ env.PACKAGE_DELETION && steps.target.outputs.name == steps.incoming.outputs.name }}
 
     - name: PR Cross Platform Build and Push
       uses: docker/build-push-action@v2
@@ -79,7 +81,7 @@ jobs:
         push: true
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-      if: "${{ env.PACKAGE_DELETION }}"
+      if: ${{ env.PACKAGE_DELETION && steps.target.outputs.name == steps.incoming.outputs.name }}
 
     - name: PR Cross Platform Build
       uses: docker/build-push-action@v2
@@ -87,7 +89,7 @@ jobs:
         context: .
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-      if: "${{ !env.PACKAGE_DELETION }}"
+      if: "${{ !env.PACKAGE_DELETION || steps.target.outputs.name == steps.incoming.outputs.name }}"
 
   security:
     name: security checks
