@@ -12,10 +12,10 @@ jobs:
     name: Delete image from ghcr.io
     runs-on: ubuntu-latest
     steps:
-      - uses: eugene-davis/action-cleanup-package@add-org-support
+      - uses: eugene-davis/action-cleanup-package@321119bb86b563e936135b7f8911a27b164c8356
         with:
           package-name: ${{ github.event.repository.name }}
           tag: pr-${{ github.event.pull_request.number }}
           github-token: ${{ secrets.PACKAGE_DELETION }}
-          org: ${{ secrets.ORG}} # Should only be set when running in an organization
+          github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
         if: ${{ env.PACKAGE_DELETION }}
