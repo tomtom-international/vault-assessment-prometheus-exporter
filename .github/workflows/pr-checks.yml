@@ -51,6 +51,12 @@ jobs:
       id: pr
       run: echo "::set-output name=id::$(echo ${{ github.ref_name }} | cut -d"/" -f1)"
       if: ${{ env.PACKAGE_DELETION }}
+    
+    - name: Show base
+      run: |
+        cat ${{ github.EVENT_PATH }} | jq .pull_request.base.label
+        cat ${{ github.EVENT_PATH }} | jq .pull_request.head.label
+
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
