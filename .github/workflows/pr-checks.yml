@@ -54,10 +54,10 @@ jobs:
              "${{ secrets.PR_CONTAINERS }}" != "" ]]
        then
          echo "PR Builds configured"
-         echo "::set-output name=BUILD_PUR::true"
+         echo "::set-output name=BUILD_PR::true"
        else
          echo "PR Builds not configured"
-         echo "::set-output name=BUILD_PUR::false"
+         echo "::set-output name=BUILD_PR::false"
        fi
 
     - name: Get PR ID
