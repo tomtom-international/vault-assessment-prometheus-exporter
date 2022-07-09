@@ -30,6 +30,6 @@ jobs:
       with:
         package-name: ${{ github.event.repository.name }}
         tag: pr-${{ github.event.pull_request.number }}
-        github-token: ${{ secrets.PACKAGE_DELETION }}
+        github-token: ${{ secrets.PR_CONTAINERS }}
         github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
       if: ${{ steps.containers.outputs.BUILD_PR }}
