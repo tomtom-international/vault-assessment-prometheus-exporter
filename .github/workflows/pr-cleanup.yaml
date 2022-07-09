@@ -4,9 +4,6 @@ on:
   pull_request:
     types: [closed]
 
-env:
-  BUILD_PR: ${{ secrets.BULD_PR }}
-
 jobs:
   purge-image:
     name: Delete image from ghcr.io
@@ -18,4 +15,3 @@ jobs:
           tag: pr-${{ github.event.pull_request.number }}
           github-token: ${{ secrets.PACKAGE_DELETION }}
           github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
-        if: ${{ env.BUILD_PR }}
