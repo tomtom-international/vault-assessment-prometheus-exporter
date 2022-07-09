@@ -5,14 +5,14 @@ on:
     types: [closed]
 
 env:
-  PACKAGE_DELETION: ${{ secrets.PACKAGE_DELETION }}
+  PACKAGE_DELETION: ${{ secrets.PR_CONTAINERS }}
 
 jobs:
   purge-image:
     name: Delete image from ghcr.io
     runs-on: ubuntu-latest
     steps:
-      - uses: eugene-davis/action-cleanup-package@321119bb86b563e936135b7f8911a27b164c8356
+      - uses: eugene-davis/action-cleanup-package@add-org-support
         with:
           package-name: ${{ github.event.repository.name }}
           tag: pr-${{ github.event.pull_request.number }}
