@@ -26,7 +26,7 @@ jobs:
          echo "::set-output name=BUILD_PR::false"
        fi
        
-    - uses: eugene-davis/action-cleanup-package@add-org-support
+    - uses: eugene-davis/action-cleanup-package@v1.1.0
       with:
         package-name: ${{ github.event.repository.name }}
         tag: pr-${{ github.event.pull_request.number }}
