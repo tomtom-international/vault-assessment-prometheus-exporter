@@ -32,4 +32,4 @@ jobs:
         tag: pr-${{ github.event.pull_request.number }}
         github-token: ${{ secrets.PR_CONTAINERS }}
         github-org: ${{ secrets.ORG}} # Should only be set when running in an organization
-      if: ${{ steps.containers.outputs.BUILD_PR }}
+      if: ${{ fromJSON(steps.containers.outputs.BUILD_PR) }}
