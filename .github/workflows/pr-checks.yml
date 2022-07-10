@@ -7,7 +7,6 @@ on:
 env:
   REQUIRED_COVERAGE: 30
 
-
 jobs:
   python:
     name: python checks
