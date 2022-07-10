@@ -49,3 +49,18 @@ To help protect the health of this project, all contributions are required to pa
 
 * [gitleaks](https://github.com/zricethezav/gitleaks) - scans the repository for possible secrets (e.g. passwords, keys), this is only the last line of defense, you should double-check before you commit!
 * [bump2version](https://github.com/c4urself/bump2version) - we ensure that the version has been bumped by bump2version on every pull request
+
+#### Automatic PR Builds
+
+The [Docker Checks](#docker-checks) job can be configured to push a PR build image (tagged pr-#) to your repository.
+It does not work when running from a forked repository.
+This image will be cleaned up after the PR is closed.
+Using this functionality requires the following secrets to be added:
+
+* `BULD_PR` must be set to `true`
+* `PR_CONTAINERS_USER` must be set to the user associated with the `PR_CONTAINERS` token
+* `PR_CONTAINERS` must be set to a Github PAT with `read`, `write` and `delete` packages permissions
+
+A PAT must be used rather than the built-in token, as Github Actions does not currently support setting the `delete` permission for packages on the default token.
+
+If you wish to enable the functionality in an organization, you must also provide the organization name in a secret called `ORG`.
