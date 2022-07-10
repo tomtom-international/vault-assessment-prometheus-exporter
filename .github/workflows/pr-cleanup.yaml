@@ -16,7 +16,7 @@ jobs:
       id: containers
       run: |
        if [[ "${{ secrets.BUILD_PR }}" != "" && \
-             "${{ secrets.BUILD_PR }}" != "" && \
+             "${{ secrets.PR_CONTAINERS_USER }}" != "" && \
              "${{ secrets.PR_CONTAINERS }}" != "" ]]
        then
          echo "PR Builds configured"
