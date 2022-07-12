@@ -93,7 +93,7 @@ jobs:
         context: .
         tags: ghcr.io/${{ github.repository }}:pr-${{ steps.pr.outputs.id }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-      if: ${{ !steps.containers.outputs.BUILD_PR }}
+      if: ${{ !fromJSON(steps.containers.outputs.BUILD_PR) }}
 
   security:
     name: security checks
