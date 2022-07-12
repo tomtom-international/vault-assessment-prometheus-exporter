@@ -4,8 +4,6 @@ on:
   pull_request:
     types: [closed]
 
-env:
-  BUILD_PR: ${{ secrets.BULD_PR }}
 
 jobs:
   purge-image:
