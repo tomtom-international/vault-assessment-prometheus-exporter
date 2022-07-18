@@ -1,0 +1,3 @@
+general:
+  vulnerabilities:
+  - CVE-2022-2097 # as I read it https://github.com/advisories/GHSA-3wx7-46ch-7rq2 shouldn't affect VAPE
