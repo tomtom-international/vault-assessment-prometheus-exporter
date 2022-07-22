@@ -63,6 +63,7 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
             logging.info(f"Refreshing token for {int(refresh_interval * 1.5)} seconds")
             vault_client.auth.token.renew_self(f"{int(refresh_interval * 1.5)}s")
 
+
 def main() -> None:
     """
     Get user arguments and launch the exporter
