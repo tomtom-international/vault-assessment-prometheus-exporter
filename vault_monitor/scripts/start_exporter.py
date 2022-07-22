@@ -60,7 +60,7 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
         sleep(refresh_interval)
 
         if vault_config.get("token_autorenew", False):
-            logging.info(f"Refreshing token for {int(refresh_interval * 1.5)} seconds")
+            logging.info("Refreshing token for %s seconds", int(refresh_interval * 1.5))
             vault_client.auth.token.renew_self(f"{int(refresh_interval * 1.5)}s")
 
 
