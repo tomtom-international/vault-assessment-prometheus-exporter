@@ -59,6 +59,9 @@ def configure_and_launch(config_file: FileIO, log_level: str = "INFO") -> None:
         # Default to 30 seconds, configurable
         sleep(refresh_interval)
 
+        if vault_config.get("token_autorenew", False):
+            logging.info(f"Refreshing token for {int(refresh_interval * 1.5)} seconds")
+            vault_client.auth.token.renew_self(f"{int(refresh_interval * 1.5)}s")
 
 def main() -> None:
     """
@@ -154,6 +157,11 @@ def get_config_schema(modules: List) -> Dict[str, Dict]:
                     "meta": {"description": "Address of Vault to connect to (including schema)."},
                 },
                 "namespace": {"type": "string", "nullable": True, "meta": {"description": "Namespace to connect, leave blank for root namespace/Open Source Vault."}},
+                "token_autorenew": {
+                    "type": "boolean",
+                    "nullable": True,
+                    "meta": {"description": "Automatically renew HashiCorp Vault token with every metric update", "link": "https://www.vaultproject.io/api-docs/auth/token#renew-a-token"},
+                },
                 "authentication": {
                     "type": "dict",
                     "nullable": False,
@@ -168,7 +176,7 @@ def get_config_schema(modules: List) -> Dict[str, Dict]:
                                     "token_file": {"type": "string", "nullable": True},
                                 },
                                 "meta": {"description": "Token authentication configuration.", "link": "https://www.vaultproject.io/docs/auth/token"},
-                            }
+                            },
                         },
                         {
                             "kubernetes": {
@@ -176,9 +184,11 @@ def get_config_schema(modules: List) -> Dict[str, Dict]:
                                 "nullable": True,
                                 "schema": {"token_file": {"type": "string", "nullable": True}, "mount_point": {"type": "string", "nullable": True}, "role": {"type": "string", "nullable": True}},
                                 "meta": {"description": "Configuration for Kubernetes authentication method.", "link": "https://www.vaultproject.io/docs/auth/kubernetes"},
-                            }
+                            },
                         },
-                        {"approle": {"type": "dict", "meta": {"description": "Configuration for AppRole authentication method.", "link": "https://www.vaultproject.io/docs/auth/approle"}}},
+                        {
+                            "approle": {"type": "dict", "meta": {"description": "Configuration for AppRole authentication method.", "link": "https://www.vaultproject.io/docs/auth/approle"}},
+                        },
                     ],
                     "meta": {"description": "Authentication type to connect with."},
                 },

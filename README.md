@@ -108,6 +108,19 @@ Kubernetes configuration allows using the `jwt` token provided by a Kuberenetes 
 * `mount_point` - mount point in Vault for the kubernetes authentication to use, `kubernetes` by default
 * `role` - the role in the kubernetes authentication method to use, `vape` by default
 
+##### Automatic Token Renewal
+
+Automatic renewal of tokens can be configured by setting the `token_autorenew` option under `authentication` to `true`.
+
+If you wish to use this option, the token will be automatically renewed by 1.5x the refresh configured for the exporter instance every time metrics are updated.
+You will need to be aware of the following while configuring your authentication method:
+
+* Maximum TTL - which controls the maximum TTL of a token including renewal extensions - if this is set, once it is hit the exporter must re-authenticate
+* Renewable - the authentication method's token must be configured with `renewable` set to `true`
+* Token duration - the initial TTL for the token must be long enough to be valid after one cycle of the exporter (so there is time for it to be renewed)
+
+Please review the [token documentation](https://learn.hashicorp.com/tutorials/vault/tokens) for more details.
+
 ## Modules
 
 Please see module documentation for how to configure specific functionality in the Vault Assessment Prometheus Exporter instance.
