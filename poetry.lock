@@ -1,6 +1,6 @@
 [[package]]
 name = "astroid"
-version = "2.12.5"
+version = "2.12.7"
 description = "An abstract syntax tree for Python with inference support."
 category = "dev"
 optional = false
