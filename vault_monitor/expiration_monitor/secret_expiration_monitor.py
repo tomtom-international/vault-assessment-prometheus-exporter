@@ -7,6 +7,8 @@ import requests
 from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
 from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
+TIMEOUT = 60
+
 
 class SecretExpirationMonitor(ExpirationMonitor):
     """
@@ -25,6 +27,7 @@ class SecretExpirationMonitor(ExpirationMonitor):
         response = requests.get(
             f"{self.vault_client.url}/v1/{self.mount_point}/metadata/{self.monitored_path}",
             headers={"X-Vault-Namespace": self.vault_client.adapter.namespace, "X-Vault-Token": self.vault_client.token},
+            timeout=TIMEOUT,
         )
         response.raise_for_status()
 

@@ -13,6 +13,7 @@ from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 from vault_monitor.expiration_monitor.create_monitors import recurse_secrets
 
 LOGGER = logging.getLogger("set_expiration")
+TIMEOUT = 60
 
 # Disable certain things for scripts only, as over-doing the DRY-ness of them can cause them to be less useful as samples
 # pylint: disable=duplicate-code,too-many-arguments,too-many-locals
@@ -85,6 +86,7 @@ def set_expiration(
         f"{vault_client_url}/v1/{mount_point}/metadata/{secret_path}",
         headers={"X-Vault-Namespace": vault_client_namespace, "X-Vault-Token": vault_client_token, "Content-Type": "application/merge-patch+json"},
         json={"custom_metadata": expiration_info.get_serialized_expiration_metadata()},
+        timeout=TIMEOUT,
     )
 
     if response.status_code == 405:
@@ -95,6 +97,7 @@ def set_expiration(
         response = requests.get(
             f"{vault_client_url}/v1/{mount_point}/metadata/{secret_path}",
             headers={"X-Vault-Namespace": vault_client_namespace, "X-Vault-Token": vault_client_token, "Content-Type": "application/merge-patch+json"},
+            timeout=TIMEOUT,
         )
         response.raise_for_status()
 
@@ -117,6 +120,7 @@ def set_expiration(
             f"{vault_client_url}/v1/{mount_point}/metadata/{secret_path}",
             headers={"X-Vault-Namespace": vault_client_namespace, "X-Vault-Token": vault_client_token},
             json=metadata,
+            timeout=TIMEOUT,
         )
 
     response.raise_for_status()
