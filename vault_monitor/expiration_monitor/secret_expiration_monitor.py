@@ -9,6 +9,7 @@ from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
 TIMEOUT = 60
 
+
 class SecretExpirationMonitor(ExpirationMonitor):
     """
     Class for monitoring KV2 secrets

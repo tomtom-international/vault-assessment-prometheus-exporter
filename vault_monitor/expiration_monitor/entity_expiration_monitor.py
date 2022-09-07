@@ -12,6 +12,7 @@ from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
 TIMEOUT = 60
 
+
 class EntityExpirationMonitor(ExpirationMonitor):
     """
     Class for monitoring entity secrets
