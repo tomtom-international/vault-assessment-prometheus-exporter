@@ -10,6 +10,7 @@ import hvac
 from vault_monitor.expiration_monitor.expiration_monitor import ExpirationMonitor
 from vault_monitor.expiration_monitor.vault_time import ExpirationMetadata
 
+TIMEOUT = 60
 
 class EntityExpirationMonitor(ExpirationMonitor):
     """
@@ -37,6 +38,7 @@ class EntityExpirationMonitor(ExpirationMonitor):
         response = requests.get(
             f"{self.vault_client.url}/v1/identity/entity/id/{self.monitored_path}",
             headers={"X-Vault-Namespace": self.vault_client.adapter.namespace, "X-Vault-Token": self.vault_client.token},
+            timeout=TIMEOUT,
         )
         response.raise_for_status()
 
