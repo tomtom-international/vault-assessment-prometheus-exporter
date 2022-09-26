@@ -1,4 +1,4 @@
-FROM python:3.10.6-alpine3.16 as builder
+FROM python:3.10.7-alpine3.16 as builder
 
 COPY . /build
 
@@ -6,7 +6,7 @@ WORKDIR /build
 
 RUN python -m venv /venv && /venv/bin/pip --no-cache-dir install .
 
-FROM python:3.10.5-alpine3.16
+FROM python:3.10.7-alpine3.16
 
 RUN addgroup exporter && adduser --system --no-create-home --shell /bin/false --ingroup exporter exporter
 USER exporter
