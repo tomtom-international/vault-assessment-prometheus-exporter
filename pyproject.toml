@@ -16,7 +16,7 @@ set_expiration = 'vault_monitor.expiration_monitor.set_expiration:main'
 [tool.poetry.dependencies]
 python = "^3.8"
 hvac = "^0.11.2"
-prometheus-client = "^0.14.1"
+prometheus-client = "^0.15.0"
 requests = "^2.27.1"
 PyYAML = "^6.0"
 Cerberus = "^1.3.4"
