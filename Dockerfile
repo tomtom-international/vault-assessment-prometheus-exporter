@@ -1,4 +1,4 @@
-FROM python:3.10.7-alpine3.16 as builder
+FROM python:3.10.8-alpine3.16 as builder
 
 COPY . /build
 
