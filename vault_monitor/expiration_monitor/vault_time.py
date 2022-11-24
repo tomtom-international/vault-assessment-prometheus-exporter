@@ -49,8 +49,12 @@ class ExpirationMetadata:
         """
         Creates an instance of ExpirationMetadata based on custom_metadata from the secret.
         """
-        last_renewed_timestamp = metadata.get(last_renewed_timestamp_fieldname, None)
-        expiration_timestamp = metadata.get(expiration_timestamp_fieldname, None)
+        if metadata:
+            last_renewed_timestamp = metadata.get(last_renewed_timestamp_fieldname, None)
+            expiration_timestamp = metadata.get(expiration_timestamp_fieldname, None)
+        else:
+            last_renewed_timestamp = ""
+            expiration_timestamp = ""
 
         # Missing fields or malformed timestamps means we go back to the 70s, should be very obvious to the user
         try:
