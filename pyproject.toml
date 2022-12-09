@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vault-assessment-prometheus-exporter"
-version = "1.1.15"
+version = "1.1.16"
 description = "Prometheus exporter to monitor custom metadata for KV2 secrets for (self-imposed) expiration."
 authors = ["Eugene Davis <eugene.davis@tomtom.com>"]
 readme = "README.md"
