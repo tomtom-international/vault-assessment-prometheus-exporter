@@ -5,14 +5,14 @@ import os
 import logging
 import warnings
 
-from typing import Dict
+from typing import Optional, Dict
 
 import hvac
 
 LOGGER = logging.getLogger("vault_authenticate")
 
 
-def get_vault_client_for_user(url: str = None, namespace: str = None, vault_token: str = None) -> hvac.Client:
+def get_vault_client_for_user(url: Optional[str] = None, namespace: Optional[str] = None, vault_token: Optional[str] = None) -> hvac.Client:
     """
     Gets a HVAC Vault client instance configured against Vault, targeted towards end-user systems (checks for environmental variables and existing token in .vault-token)
     """
@@ -60,7 +60,7 @@ def get_authenticated_client(auth_config: Dict[str, Dict[str, str]], address: st
     return get_client_with_token_auth(token_auth_config, address, namespace)
 
 
-def get_namespace(namespace: str = None) -> str:
+def get_namespace(namespace: Optional[str] = None) -> str:
     """
     In the event that namespace is None, return the value for VAULT_NAMESPACE if that is set
     """
@@ -70,7 +70,7 @@ def get_namespace(namespace: str = None) -> str:
     return namespace
 
 
-def get_address(address: str = None) -> str:
+def get_address(address: Optional[str] = None) -> str:
     """
     If the Vault address isn't set, check the contents of the VAULT_ADDR environmental variable and return it.
     """

@@ -2,7 +2,7 @@
 Class for monitoring entity secret expiration information in HashiCorp Vault.
 """
 
-from typing import Dict
+from typing import Optional, Dict
 
 import requests
 import hvac
@@ -24,7 +24,14 @@ class EntityExpirationMonitor(ExpirationMonitor):
     expiration_gauge_description = "Timestamp for when an entity's secrets should be expired and rotated."
 
     def __init__(
-        self, mount_point: str, monitored_path: str, name: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str] = None, metadata_fieldnames: Dict[str, str] = None
+        self,
+        mount_point: str,
+        monitored_path: str,
+        name: str,
+        vault_client: hvac.Client,
+        service: str,
+        prometheus_labels: Optional[Dict[str, str]] = None,
+        metadata_fieldnames: Optional[Dict[str, str]] = None,
     ) -> None:
         if prometheus_labels:
             prometheus_labels.update({"entity_name": name})
