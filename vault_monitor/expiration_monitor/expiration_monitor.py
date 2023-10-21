@@ -2,7 +2,7 @@
 Class for monitoring expiration information in HashiCorp Vault.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, List, Type, TypeVar
+from typing import Optional, Dict, List, Type, TypeVar
 
 import hvac
 from prometheus_client import Gauge
@@ -25,7 +25,9 @@ class ExpirationMonitor(ABC):
     expiration_gauge_name: str
     expiration_gauge_description: str
 
-    def __init__(self, mount_point: str, monitored_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Dict[str, str] = None, metadata_fieldnames: Dict[str, str] = None) -> None:
+    def __init__(
+        self, mount_point: str, monitored_path: str, vault_client: hvac.Client, service: str, prometheus_labels: Optional[Dict[str, str]] = None, metadata_fieldnames: Optional[Dict[str, str]] = None
+    ) -> None:
         """
         Creates an instance of the ExpirationMonitor class.
         """

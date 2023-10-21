@@ -1,3 +1,3 @@
 general:
   vulnerabilities:
-  - CVE-2022-43680 # libexpat isn't available in Alpine 3.16's repositories so I believe this is a false positive
+    - CVE-2022-40897 # Seems to be a false positive, see update at https://hub.docker.com/layers/library/python/3.11.1-alpine3.17/images/sha256-4fc84c93c255afc1f83766d8b736ce2c8ca82f6489193cab709fcde759f720a2?context=explore
